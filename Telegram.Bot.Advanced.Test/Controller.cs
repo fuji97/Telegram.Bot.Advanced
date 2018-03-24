@@ -9,24 +9,24 @@ namespace Telegram.Bot.Advanced.Test
     
     class Controller
     {
-        [IdFilter(10)]
+        [CommandFilter("ciao")]
         public static void Test1(Update update) {
             Console.WriteLine("Test 10");
         }
 
-        [IdFilter(10), TextMessage("Ciao")]
+        [NoCommandFilter()]
         public static void Test12(Update update)
         {
             Console.WriteLine("Test 10 con Ciao");
         }
 
-        [IdFilter(10), TextMessage("Mondo")]
+        [NoCommandFilter]
         public static void Test123(Update update)
         {
             Console.WriteLine("Test 10 con Mondo");
         }
 
-        [IdFilter(20)]
+        [CommandFilter("help")]
         public static void Test2(Update update) {
             Console.WriteLine("Test 20");
         }

@@ -7,6 +7,6 @@ namespace Telegram.Bot.Advanced.DispatcherFilters
 {
     [AttributeUsage(AttributeTargets.Method)]
     public abstract class DispatcherFilterAttribute : Attribute {
-        public abstract bool IsValid(Update update);
+        public abstract bool IsValid(Update update, MessageCommand command);
     }
 }

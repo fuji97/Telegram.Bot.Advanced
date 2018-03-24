@@ -1,6 +1,5 @@
 ﻿using System;
 using Telegram.Bot.Args;
-using Telegram.Bot.Types;
 
 namespace Telegram.Bot.Advanced.Test
 {
@@ -10,7 +9,7 @@ namespace Telegram.Bot.Advanced.Test
 
         static void Main(string[] args)
         {
-            var bot = new TelegramBotClient("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+            var bot = new TelegramBotClient("437894347:AAEmadhGMPjSF1BtRLad5NXTkRuiW-aIelc");
 
             // Disable WebHook
             bot.DeleteWebhookAsync();

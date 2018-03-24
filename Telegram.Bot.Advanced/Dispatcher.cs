@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.DispatcherFilters;
 using Telegram.Bot.Advanced.Exceptions;
+using Telegram.Bot.Advanced.Models;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using User = Telegram.Bot.Advanced.Models.User;
@@ -26,8 +27,9 @@ namespace Telegram.Bot.Advanced
 
         public void DispatchUpdate(Update update) {
             Console.WriteLine($"Received update - ID: {update.Id}");
+            User user = null;
             if (update.Type == UpdateType.Message && update.Message.Chat.Type == ChatType.Private) { 
-                var user = User.Get(update.Message.Chat.Id);
+                user = User.Get(update.Message.Chat.Id);
                 if (user.Username != update.Message.Chat.Username) {
                     user.Username = update.Message.Chat.Username;
                     user.Update();
@@ -35,20 +37,32 @@ namespace Telegram.Bot.Advanced
                 Console.WriteLine($"Chat privata - Informazioni sull'utente: [{user.Id}] @{user.Username} State: {user.State} - Role: {user.Role}");
             }
 
+            MessageCommand command;
+            if (update.Type == UpdateType.Message) {
+                command = update.Message.GetCommand();
+                if (command.Target != null && command.Target != user.Username) {
+                    Console.WriteLine($"Command's target is @{command.Target} - Ignoring command");
+                    return;
+                }
+            }
+            else {
+                command = new MessageCommand();
+            }
+
 
             foreach (var method in _methods.Where(m => m.GetCustomAttributes()
                                                         .Where(att => att is DispatcherFilterAttribute)
-                                                        .All(attr => ((DispatcherFilterAttribute) attr).IsValid(update)))) {
+                                                        .All(attr => ((DispatcherFilterAttribute) attr).IsValid(update, command)))) {
                 var parameters = method.GetParameters();
                 if (!parameters.Any() || parameters[0].ParameterType != typeof(Update)) {
                     throw new InvalidRouteMethodArguments(parameters?[0], "The first parameter must be the Update");
                 }
                 var arguments = new List<Object> {update};
                 foreach (var par in parameters.Skip(1)) {
-                    if (par.ParameterType == typeof(string)) {
-                            arguments.Add("parsedCOmmand"); // TODO
-                    } else if (par.ParameterType == typeof(IEnumerable<Object>)) {
-                        arguments.Add(null);
+                    if (par.ParameterType == typeof(MessageCommand)) {
+                            arguments.Add(command);
+                    } else if (par.ParameterType == typeof(User)) {
+                        arguments.Add(user);
                     } else {
                         throw new InvalidRouteMethodArguments(par);
                     }
