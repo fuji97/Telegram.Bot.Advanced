@@ -1,19 +1,30 @@
 ﻿using System;
+using Telegram.Bot.Args;
 using Telegram.Bot.Types;
 
 namespace Telegram.Bot.Advanced.Test
 {
     class Program
     {
+        private static Dispatcher Dispatcher { get; } = new Dispatcher(typeof(Controller));
+
         static void Main(string[] args)
         {
-            var dispatcher = new Dispatcher(typeof(Controller));
+            var bot = new TelegramBotClient("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 
-            Update testUpdate = new Update() {Id = 10, Message = new Message() {Text = "Ciao"}};
+            // Disable WebHook
+            bot.DeleteWebhookAsync();
 
-            dispatcher.DispatchUpdate(testUpdate);
+            bot.OnUpdate += SendToDispatcher;
 
-            Console.ReadKey();
+            bot.StartReceiving();
+            Console.WriteLine($"Start listening.");
+            Console.ReadLine();
+            bot.StopReceiving();
+        }
+
+        public static void SendToDispatcher(object sender, UpdateEventArgs args) {
+            Dispatcher.DispatchUpdate(args.Update);
         }
     }
 }
