@@ -14,8 +14,8 @@ namespace Telegram.Bot.Advanced
             var match = Regex.Match(message.Text, @"^\/([^@\s]+)@?(?:(\S+)|)\s?([\s\S]*)$");
             
             var command = new MessageCommand() {
-                Command = match.Groups[1].Value,
-                Target = match.Groups[2].Value,
+                Command = match.Groups[1].Success ? match.Groups[1].Value : null,
+                Target = match.Groups[2].Success ? match.Groups[2].Value : null,
                 Parameters = new List<string>(match.Groups[3].Value.Split(" "))
             };
 

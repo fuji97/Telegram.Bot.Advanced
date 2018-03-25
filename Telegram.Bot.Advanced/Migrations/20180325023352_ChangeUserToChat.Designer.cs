@@ -13,9 +13,10 @@ using Telegram.Bot.Types.Enums;
 namespace Telegram.Bot.Advanced.Migrations
 {
     [DbContext(typeof(UserContext))]
-    partial class UserContextModelSnapshot : ModelSnapshot
+    [Migration("20180325023352_ChangeUserToChat")]
+    partial class ChangeUserToChat
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

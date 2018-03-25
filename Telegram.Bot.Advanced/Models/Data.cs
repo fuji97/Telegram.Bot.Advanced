@@ -7,10 +7,16 @@ namespace Telegram.Bot.Advanced.Models
 {
     public class Data {
         [Key]
-        public User User { get; set; }
+        public TelegramChat User { get; set; }
         [Key]
         public string Key { get; set; }
         public string Value { get; set; }
+
+        public Data(TelegramChat user, string key, string value) {
+            User = user;
+            Key = key;
+            Value = value;
+        }
 
         public override bool Equals(object obj) {
             if (obj is Data data) {

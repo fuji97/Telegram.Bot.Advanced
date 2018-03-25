@@ -6,20 +6,19 @@ namespace Telegram.Bot.Advanced.Test
     class Program
     {
         private static Dispatcher Dispatcher { get; } = new Dispatcher(typeof(Controller));
+        public static ITelegramBotClient RealBot { get; } = new TelegramBotClient("437894347:AAEmadhGMPjSF1BtRLad5NXTkRuiW-aIelc");
 
         static void Main(string[] args)
         {
-            var bot = new TelegramBotClient("437894347:AAEmadhGMPjSF1BtRLad5NXTkRuiW-aIelc");
-
             // Disable WebHook
-            bot.DeleteWebhookAsync();
+            RealBot.DeleteWebhookAsync();
 
-            bot.OnUpdate += SendToDispatcher;
+            RealBot.OnUpdate += SendToDispatcher;
 
-            bot.StartReceiving();
+            RealBot.StartReceiving();
             Console.WriteLine($"Start listening.");
             Console.ReadLine();
-            bot.StopReceiving();
+            RealBot.StopReceiving();
         }
 
         public static void SendToDispatcher(object sender, UpdateEventArgs args) {

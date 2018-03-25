@@ -16,7 +16,7 @@ namespace Telegram.Bot.Advanced.DbContexts
         protected override void OnModelCreating(ModelBuilder modelBuilder) {}
 
         // Entities
-        public DbSet<User> Users { get; set; }
+        public DbSet<TelegramChat> Users { get; set; }
         public DbSet<Data> Data { get; set; }
     }
 }
