@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.Exceptions;
 using Telegram.Bot.Requests;
@@ -59,32 +60,51 @@ namespace Telegram.Bot.Advanced.Models
             Data.Add(new Data(this, key, value));
         }
 
-        public void Update() {
-            using (var context = new UserContext()) {
-
-                context.Update(this);
-                context.SaveChanges();
+        public void UpdateData(string key, string value) {
+            var data = Data.FirstOrDefault(d => d.Key == key);
+            if (data != null) {
+                data.Value = value;
+            }
+            else {
+                Data.Add(new Data(this, key, value));
             }
         }
 
-        public bool Add() {
-            using (var context = new UserContext()) {
-                var user = context.Users.FirstOrDefault(u => u.Id == Id);
-                if (user == null) {
-                    context.Add(this);
-                    return true;
+        public string this[string key]
+        {
+            get {
+                return Data.FirstOrDefault(d => d.Key == key)?.Value;
+            }
+            set {
+                var anotherName = Data.FirstOrDefault(d => d.Key == key);
+                if (anotherName != null) {
+                    anotherName.Value = value;
                 }
-
-                return false;
+                else
+                {
+                    Data.Add(new Data(this, key, value));
+                }
             }
         }
 
-        public static TelegramChat Get(long id) {
-            using (var context = new UserContext())
-            {
-                var user = context.Users.FirstOrDefault(u => u.Id == id);
-                return user;
+        public void Update(UserContext context) {
+            context.Update(this);
+            context.SaveChanges();
+        }
+
+        public bool Add(UserContext context) {
+            var user = context.Users.FirstOrDefault(u => u.Id == Id);
+            if (user == null) {
+                context.Add(this);
+                return true;
             }
+
+            return false;
+        }
+
+        public static TelegramChat Get(UserContext context, long id) {
+            var user = context.Users.Include(chat => chat.Data).FirstOrDefault(u => u.Id == id);
+            return user;
         }
 
         public override bool Equals(Object obj) {

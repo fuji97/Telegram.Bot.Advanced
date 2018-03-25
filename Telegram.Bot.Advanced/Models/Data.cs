@@ -12,6 +12,8 @@ namespace Telegram.Bot.Advanced.Models
         public string Key { get; set; }
         public string Value { get; set; }
 
+        public Data() { }
+
         public Data(TelegramChat user, string key, string value) {
             User = user;
             Key = key;
@@ -26,12 +28,12 @@ namespace Telegram.Bot.Advanced.Models
         }
 
         public static bool operator ==(Data left, Data right) {
-            return left != null && left.Equals(right);
+            return !object.ReferenceEquals(null, left) && left.Equals(right);
         }
 
         public static bool operator !=(Data left, Data right)
         {
-            return left == null || !left.Equals(right);
+            return object.ReferenceEquals(null, left) || !left.Equals(right);
         }
 
         public override int GetHashCode() {
