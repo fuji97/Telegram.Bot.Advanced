@@ -15,8 +15,17 @@ namespace Telegram.Bot.Advanced
     public class Dispatcher {
         private readonly IEnumerable<MethodInfo> _methods;
         private readonly ILogger _logger;
+        private readonly Type _databaseContext;
 
-        public Dispatcher(Type controller) {
+        public Dispatcher(Type controller, Type databaseContext = null) {
+            if (databaseContext != null && databaseContext.IsSubclassOf(typeof(UserContext))) {
+                this._databaseContext = databaseContext;
+            }
+            else {
+                Console.WriteLine("Invalid or not present database context, using default.");
+                this._databaseContext = typeof(UserContext);
+            }
+
             _methods = controller.GetMethods(BindingFlags.Public | BindingFlags.Static)
                                  .Where(m => m.GetCustomAttributes(typeof(DispatcherFilterAttribute), false).Length > 0);
 
@@ -25,7 +34,7 @@ namespace Telegram.Bot.Advanced
         }
 
         public void DispatchUpdate(Update update) {
-            using (var context = new UserContext()) {
+            using (UserContext context = (UserContext) Activator.CreateInstance(_databaseContext)) {
                 Console.WriteLine($"Received update - ID: {update.Id}");
                 TelegramChat chat = null;
                 if (update.Type == UpdateType.Message) {
@@ -83,7 +92,7 @@ namespace Telegram.Bot.Advanced
                             chat.Update(context);
                     }
                     else {
-                        // TODO Creare chat
+                        chat = new TelegramChat(update.Message.Chat);
                     }
 
                     Console.WriteLine(
