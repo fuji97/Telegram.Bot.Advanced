@@ -5,20 +5,20 @@ namespace Telegram.Bot.Advanced.Test
 {
     class Program
     {
-        private static Dispatcher Dispatcher { get; } = new Dispatcher(typeof(Controller), typeof(MasterContext));
-        public static ITelegramBotClient RealBot { get; } = new TelegramBotClient("437894347:AAEmadhGMPjSF1BtRLad5NXTkRuiW-aIelc");
+        private static Dispatcher<MasterContext> Dispatcher { get; } = new Dispatcher<MasterContext>(typeof(Controller));
+        public static ITelegramBotClient Bot { get; } = new TelegramBotClient("437894347:AAEmadhGMPjSF1BtRLad5NXTkRuiW-aIelc");
 
         static void Main(string[] args)
         {
             // Disable WebHook
-            RealBot.DeleteWebhookAsync();
+            Bot.DeleteWebhookAsync();
 
-            RealBot.OnUpdate += SendToDispatcher;
+            Bot.OnUpdate += SendToDispatcher;
 
-            RealBot.StartReceiving();
+            Bot.StartReceiving();
             Console.WriteLine($"Start listening.");
             Console.ReadLine();
-            RealBot.StopReceiving();
+            Bot.StopReceiving();
         }
 
         public static void SendToDispatcher(object sender, UpdateEventArgs args) {

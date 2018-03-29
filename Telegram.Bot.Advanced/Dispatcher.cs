@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
@@ -12,29 +13,21 @@ using Telegram.Bot.Types.Enums;
 
 namespace Telegram.Bot.Advanced
 {
-    public class Dispatcher {
+    public class Dispatcher<T> where T : UserContext, new() {
         private readonly IEnumerable<MethodInfo> _methods;
         private readonly ILogger _logger;
-        private readonly Type _databaseContext;
 
-        public Dispatcher(Type controller, Type databaseContext = null) {
-            if (databaseContext != null && databaseContext.IsSubclassOf(typeof(UserContext))) {
-                this._databaseContext = databaseContext;
-            }
-            else {
-                Console.WriteLine("Invalid or not present database context, using default.");
-                this._databaseContext = typeof(UserContext);
-            }
+        public Dispatcher(Type controller) {
 
             _methods = controller.GetMethods(BindingFlags.Public | BindingFlags.Static)
                                  .Where(m => m.GetCustomAttributes(typeof(DispatcherFilterAttribute), false).Length > 0);
 
             ILoggerFactory loggerFactory = new LoggerFactory();
-            _logger = loggerFactory.CreateLogger<Dispatcher>();
+            _logger = loggerFactory.CreateLogger<Dispatcher<T>>();
         }
 
         public void DispatchUpdate(Update update) {
-            using (UserContext context = (UserContext) Activator.CreateInstance(_databaseContext)) {
+            using (UserContext context = new T()) {
                 Console.WriteLine($"Received update - ID: {update.Id}");
                 TelegramChat chat = null;
                 if (update.Type == UpdateType.Message) {
@@ -93,6 +86,7 @@ namespace Telegram.Bot.Advanced
                     }
                     else {
                         chat = new TelegramChat(update.Message.Chat);
+                        context.Add(chat);
                     }
 
                     Console.WriteLine(
@@ -127,7 +121,7 @@ namespace Telegram.Bot.Advanced
                         if (par.ParameterType == typeof(MessageCommand)) {
                             arguments.Add(command);
                         }
-                        else if (par.ParameterType == typeof(UserContext)) {
+                        else if (par.ParameterType == typeof(T)) {
                             arguments.Add(context);
                         }
                         else if (par.ParameterType == typeof(TelegramChat)) {
@@ -139,6 +133,13 @@ namespace Telegram.Bot.Advanced
                     }
 
                     method.Invoke(null, arguments.ToArray());
+                }
+
+                try {
+                    context.SaveChanges();
+                }
+                catch (SqlException e) {
+                    Console.WriteLine(e.Message);
                 }
             }
         }

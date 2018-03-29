@@ -30,7 +30,7 @@ namespace Telegram.Bot.Advanced.Models
         public string InviteLink { get; set; }
         public string StickerSetName { get; set; }
         public bool? CanSetStickerSet { get; set; }
-        public List<Data> Data { get; set; } = new List<Data>();
+        public ICollection<Data> Data { get; set; } = new List<Data>();
 
         public TelegramChat() {
         }
@@ -40,6 +40,7 @@ namespace Telegram.Bot.Advanced.Models
         }
 
         public TelegramChat(Chat update) {
+            Id = update.Id;
             Username = update.Username;
             Type = update.Type;
             Title = update.Title;
@@ -88,8 +89,8 @@ namespace Telegram.Bot.Advanced.Models
         }
 
         public void Update(UserContext context) {
-            context.Update(this);
-            context.SaveChanges();
+            //context.Update(this);
+            //context.SaveChanges();
         }
 
         public bool Add(UserContext context) {

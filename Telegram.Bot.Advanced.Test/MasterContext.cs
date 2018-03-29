@@ -12,6 +12,13 @@ namespace Telegram.Bot.Advanced.Test
             optionsBuilder.UseSqlServer(@"Server=localhost\SQLEXPRESS;Database=telegram-bot;Trusted_Connection=True;");
         }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder) {
+
+            modelBuilder.Entity<RegisteredChat>().HasKey(t => new { t.ChatId, t.MasterId });
+
+        }
+
         public DbSet<Master> Masters { get; set; }
+        public DbSet<RegisteredChat> RegisteredChats { get; set; }
     }
 }

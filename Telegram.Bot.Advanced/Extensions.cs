@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Telegram.Bot.Types;
@@ -16,7 +17,7 @@ namespace Telegram.Bot.Advanced
             var command = new MessageCommand() {
                 Command = match.Groups[1].Success ? match.Groups[1].Value : null,
                 Target = match.Groups[2].Success ? match.Groups[2].Value : null,
-                Parameters = new List<string>(match.Groups[3].Value.Split(" "))
+                Parameters = new List<string>(match.Groups[3].Value.Split(" ").Where(s => s != ""))
             };
 
             return command;
