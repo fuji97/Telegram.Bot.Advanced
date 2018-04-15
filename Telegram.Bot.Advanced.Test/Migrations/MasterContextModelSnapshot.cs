@@ -24,16 +24,15 @@ namespace Telegram.Bot.Advanced.Test.Migrations
 
             modelBuilder.Entity("Telegram.Bot.Advanced.Models.Data", b =>
                 {
-                    b.Property<string>("Key")
-                        .ValueGeneratedOnAdd();
+                    b.Property<long>("UserId");
 
-                    b.Property<long?>("UserId");
+                    b.Property<string>("Key");
 
                     b.Property<string>("Value");
 
-                    b.HasKey("Key");
+                    b.HasKey("UserId", "Key");
 
-                    b.HasIndex("UserId");
+                    b.HasAlternateKey("Key", "UserId");
 
                     b.ToTable("Data");
                 });
@@ -88,7 +87,7 @@ namespace Telegram.Bot.Advanced.Test.Migrations
 
                     b.Property<string>("SupportList");
 
-                    b.Property<long?>("UserId");
+                    b.Property<long>("UserId");
 
                     b.HasKey("Id");
 
@@ -114,14 +113,16 @@ namespace Telegram.Bot.Advanced.Test.Migrations
                 {
                     b.HasOne("Telegram.Bot.Advanced.Models.TelegramChat", "User")
                         .WithMany("Data")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Telegram.Bot.Advanced.Test.Master", b =>
                 {
                     b.HasOne("Telegram.Bot.Advanced.Models.TelegramChat", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Telegram.Bot.Advanced.Test.RegisteredChat", b =>
@@ -129,12 +130,12 @@ namespace Telegram.Bot.Advanced.Test.Migrations
                     b.HasOne("Telegram.Bot.Advanced.Models.TelegramChat", "Chat")
                         .WithMany()
                         .HasForeignKey("ChatId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("Telegram.Bot.Advanced.Test.Master", "Master")
                         .WithMany("RegisteredChats")
                         .HasForeignKey("MasterId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.SetNull);
                 });
 #pragma warning restore 612, 618
         }

@@ -1,21 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Telegram.Bot.Advanced.Models
 {
     public class Data {
         [Key]
-        public TelegramChat User { get; set; }
-        // TODO Set User Id Manually
+        public long UserId { get; set; }
         [Key]
         public string Key { get; set; }
         public string Value { get; set; }
+        [ForeignKey("UserId")]
+        public TelegramChat User { get; set; }
 
         public Data() { }
 
         public Data(TelegramChat user, string key, string value) {
+            UserId = user.Id;
             User = user;
             Key = key;
             Value = value;
@@ -23,7 +27,7 @@ namespace Telegram.Bot.Advanced.Models
 
         public override bool Equals(object obj) {
             if (obj is Data data) {
-                return User == data.User && Key == data.Key && Value == data.Value;
+                return UserId == data.UserId && Key == data.Key && Value == data.Value;
             }
             return false;
         }
@@ -52,7 +56,7 @@ namespace Telegram.Bot.Advanced.Models
 
         public override int GetHashCode() {
             unchecked {
-                var hashCode = (User != null ? User.GetHashCode() : 0);
+                var hashCode = (UserId.GetHashCode());
                 hashCode = (hashCode * 397) ^ (Key != null ? Key.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (Value != null ? Value.GetHashCode() : 0);
                 return hashCode;

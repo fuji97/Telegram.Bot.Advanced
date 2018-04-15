@@ -8,12 +8,13 @@ using Microsoft.EntityFrameworkCore.Storage.Internal;
 using System;
 using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.Models;
+using Telegram.Bot.Types.Enums;
 
 namespace Telegram.Bot.Advanced.Migrations
 {
     [DbContext(typeof(UserContext))]
-    [Migration("20180324033751_CreateUserDataDB")]
-    partial class CreateUserDataDB
+    [Migration("20180403041710_StartingMigration")]
+    partial class StartingMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -24,27 +25,44 @@ namespace Telegram.Bot.Advanced.Migrations
 
             modelBuilder.Entity("Telegram.Bot.Advanced.Models.Data", b =>
                 {
-                    b.Property<string>("Key")
-                        .ValueGeneratedOnAdd();
+                    b.Property<long>("UserId");
 
-                    b.Property<long?>("UserId");
+                    b.Property<string>("Key");
 
                     b.Property<string>("Value");
 
-                    b.HasKey("Key");
+                    b.HasKey("UserId", "Key");
 
-                    b.HasIndex("UserId");
+                    b.HasAlternateKey("Key", "UserId");
 
                     b.ToTable("Data");
                 });
 
-            modelBuilder.Entity("Telegram.Bot.Advanced.Models.User", b =>
+            modelBuilder.Entity("Telegram.Bot.Advanced.Models.TelegramChat", b =>
                 {
                     b.Property<long>("Id");
+
+                    b.Property<bool>("AllMembersAreAdministrators");
+
+                    b.Property<bool?>("CanSetStickerSet");
+
+                    b.Property<string>("Description");
+
+                    b.Property<string>("FirstName");
+
+                    b.Property<string>("InviteLink");
+
+                    b.Property<string>("LastName");
 
                     b.Property<int>("Role");
 
                     b.Property<int>("State");
+
+                    b.Property<string>("StickerSetName");
+
+                    b.Property<string>("Title");
+
+                    b.Property<int>("Type");
 
                     b.Property<string>("Username");
 
@@ -55,9 +73,10 @@ namespace Telegram.Bot.Advanced.Migrations
 
             modelBuilder.Entity("Telegram.Bot.Advanced.Models.Data", b =>
                 {
-                    b.HasOne("Telegram.Bot.Advanced.Models.User", "User")
+                    b.HasOne("Telegram.Bot.Advanced.Models.TelegramChat", "User")
                         .WithMany("Data")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

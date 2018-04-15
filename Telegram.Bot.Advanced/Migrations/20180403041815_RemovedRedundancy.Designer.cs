@@ -13,8 +13,8 @@ using Telegram.Bot.Types.Enums;
 namespace Telegram.Bot.Advanced.Migrations
 {
     [DbContext(typeof(UserContext))]
-    [Migration("20180325023352_ChangeUserToChat")]
-    partial class ChangeUserToChat
+    [Migration("20180403041815_RemovedRedundancy")]
+    partial class RemovedRedundancy
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -25,16 +25,15 @@ namespace Telegram.Bot.Advanced.Migrations
 
             modelBuilder.Entity("Telegram.Bot.Advanced.Models.Data", b =>
                 {
-                    b.Property<string>("Key")
-                        .ValueGeneratedOnAdd();
+                    b.Property<long>("UserId");
 
-                    b.Property<long?>("UserId");
+                    b.Property<string>("Key");
 
                     b.Property<string>("Value");
 
-                    b.HasKey("Key");
+                    b.HasKey("UserId", "Key");
 
-                    b.HasIndex("UserId");
+                    b.HasAlternateKey("Key", "UserId");
 
                     b.ToTable("Data");
                 });
@@ -76,7 +75,8 @@ namespace Telegram.Bot.Advanced.Migrations
                 {
                     b.HasOne("Telegram.Bot.Advanced.Models.TelegramChat", "User")
                         .WithMany("Data")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

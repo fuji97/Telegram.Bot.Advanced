@@ -6,16 +6,17 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
 using System;
-using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.Models;
+using Telegram.Bot.Advanced.Test;
 using Telegram.Bot.Types.Enums;
 
-namespace Telegram.Bot.Advanced.Migrations
+namespace Telegram.Bot.Advanced.Test.Migrations
 {
-    [DbContext(typeof(UserContext))]
-    partial class UserContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(MasterContext))]
+    [Migration("20180403044730_RemovingLoops")]
+    partial class RemovingLoops
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -70,12 +71,72 @@ namespace Telegram.Bot.Advanced.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("Telegram.Bot.Advanced.Test.Master", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("FriendCode");
+
+                    b.Property<string>("Name");
+
+                    b.Property<string>("ServantList");
+
+                    b.Property<int>("Server");
+
+                    b.Property<int>("Status");
+
+                    b.Property<string>("SupportList");
+
+                    b.Property<long>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Masters");
+                });
+
+            modelBuilder.Entity("Telegram.Bot.Advanced.Test.RegisteredChat", b =>
+                {
+                    b.Property<long>("ChatId");
+
+                    b.Property<int>("MasterId");
+
+                    b.HasKey("ChatId", "MasterId");
+
+                    b.HasIndex("MasterId");
+
+                    b.ToTable("RegisteredChats");
+                });
+
             modelBuilder.Entity("Telegram.Bot.Advanced.Models.Data", b =>
                 {
                     b.HasOne("Telegram.Bot.Advanced.Models.TelegramChat", "User")
                         .WithMany("Data")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Telegram.Bot.Advanced.Test.Master", b =>
+                {
+                    b.HasOne("Telegram.Bot.Advanced.Models.TelegramChat", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Telegram.Bot.Advanced.Test.RegisteredChat", b =>
+                {
+                    b.HasOne("Telegram.Bot.Advanced.Models.TelegramChat", "Chat")
+                        .WithMany()
+                        .HasForeignKey("ChatId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Telegram.Bot.Advanced.Test.Master", "Master")
+                        .WithMany("RegisteredChats")
+                        .HasForeignKey("MasterId")
+                        .OnDelete(DeleteBehavior.SetNull);
                 });
 #pragma warning restore 612, 618
         }

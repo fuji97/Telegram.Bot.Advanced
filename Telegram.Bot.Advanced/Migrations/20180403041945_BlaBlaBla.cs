@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Telegram.Bot.Advanced.Migrations
 {
-    public partial class ArrayDataToList : Migration
+    public partial class BlaBlaBla : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

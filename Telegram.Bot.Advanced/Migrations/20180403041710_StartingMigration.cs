@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Telegram.Bot.Advanced.Migrations
 {
-    public partial class CreateUserDataDB : Migration
+    public partial class StartingMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -13,8 +13,17 @@ namespace Telegram.Bot.Advanced.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(nullable: false),
+                    AllMembersAreAdministrators = table.Column<bool>(nullable: false),
+                    CanSetStickerSet = table.Column<bool>(nullable: true),
+                    Description = table.Column<string>(nullable: true),
+                    FirstName = table.Column<string>(nullable: true),
+                    InviteLink = table.Column<string>(nullable: true),
+                    LastName = table.Column<string>(nullable: true),
                     Role = table.Column<int>(nullable: false),
                     State = table.Column<int>(nullable: false),
+                    StickerSetName = table.Column<string>(nullable: true),
+                    Title = table.Column<string>(nullable: true),
+                    Type = table.Column<int>(nullable: false),
                     Username = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -26,25 +35,21 @@ namespace Telegram.Bot.Advanced.Migrations
                 name: "Data",
                 columns: table => new
                 {
+                    UserId = table.Column<long>(nullable: false),
                     Key = table.Column<string>(nullable: false),
-                    UserId = table.Column<long>(nullable: true),
                     Value = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Data", x => x.Key);
+                    table.PrimaryKey("PK_Data", x => new { x.UserId, x.Key });
+                    table.UniqueConstraint("AK_Data_Key_UserId", x => new { x.Key, x.UserId });
                     table.ForeignKey(
                         name: "FK_Data_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Data_UserId",
-                table: "Data",
-                column: "UserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

@@ -13,7 +13,9 @@ namespace Telegram.Bot.Advanced.DbContexts
             optionsBuilder.UseSqlServer(@"Server=localhost\SQLEXPRESS;Database=telegram-bot;Trusted_Connection=True;");
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder) {}
+        protected override void OnModelCreating(ModelBuilder modelBuilder) {
+            modelBuilder.Entity<Data>().HasKey(t => new { t.UserId, t.Key });
+        }
 
         // Entities
         public DbSet<TelegramChat> Users { get; set; }

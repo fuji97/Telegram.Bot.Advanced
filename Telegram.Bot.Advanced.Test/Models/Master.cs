@@ -13,9 +13,9 @@ namespace Telegram.Bot.Advanced.Test
 {
     public class Master
     {
-        public TelegramChat User { get; set; }
         [Key]
         public int Id { get; set; }
+        public long UserId { get; set; }
         public string Name { get; set; }
         public string FriendCode { get; set; }
         public string SupportList { get; set; }
@@ -23,12 +23,15 @@ namespace Telegram.Bot.Advanced.Test
         public MasterServer Server { get; set; }
         public MasterStatus Status { get; set; }
         public ICollection<RegisteredChat> RegisteredChats { get; set; }
+        [ForeignKey("UserId")]
+        public TelegramChat User { get; set; }
 
         public Master() { }
 
         public Master(TelegramChat user, string name, string friendCode, MasterServer server, string support = null, string servant = null,
             MasterStatus status = MasterStatus.Enabled) {
             User = user;
+            UserId = user.Id;
             Name = name;
             FriendCode = friendCode;
             Server = server;
