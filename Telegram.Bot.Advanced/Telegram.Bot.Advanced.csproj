@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
@@ -10,10 +10,10 @@
     <FileVersion>0.1.0.0</FileVersion>
     <Description>An extension for Telegram.Bot to support dispatching based of filters and Dependency Injection</Description>
     <Copyright>Copyright © Federico Rapetti</Copyright>
-    <PackageLicenseUrl>https://github.com/fuji97/Telegram.Bot.Advanced/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/fuji97/Telegram.Bot.Advanced</PackageProjectUrl>
     <RepositoryUrl>https://github.com/fuji97/Telegram.Bot.Advanced</RepositoryUrl>
     <PackageTags>Telegram Bot Api</PackageTags>
+    <PackageLicenseFile>license.txt</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,6 +21,10 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.2.0" />
     <PackageReference Include="Telegram.Bot" Version="14.10.0" />
     <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="license\license.txt" Pack="true" PackagePath=""/>
   </ItemGroup>
 
   <ItemGroup>
