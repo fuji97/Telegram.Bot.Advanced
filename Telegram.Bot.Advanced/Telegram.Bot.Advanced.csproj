@@ -5,13 +5,20 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Fuji97</Authors>
     <Company>Sidereal Works</Company>
-    <Version>1.0.2</Version>
-    <AssemblyVersion>1.0.0.2</AssemblyVersion>
-    <FileVersion>1.0.1.2</FileVersion>
+    <Version>0.1</Version>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <FileVersion>0.1.0.0</FileVersion>
+    <Description>An extension for Telegram.Bot to support dispatching based of filters and Dependency Injection</Description>
+    <Copyright>Copyright © Federico Rapetti</Copyright>
+    <PackageLicenseUrl>https://github.com/fuji97/Telegram.Bot.Advanced/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/fuji97/Telegram.Bot.Advanced</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/fuji97/Telegram.Bot.Advanced</RepositoryUrl>
+    <PackageTags>Telegram Bot Api</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.2.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.2.0" />
     <PackageReference Include="Telegram.Bot" Version="14.10.0" />
     <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.2" />
   </ItemGroup>

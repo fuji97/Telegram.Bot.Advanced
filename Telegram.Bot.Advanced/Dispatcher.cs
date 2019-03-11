@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Telegram.Bot.Advanced.Controller;
 using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.DispatcherFilters;
 using Telegram.Bot.Advanced.Exceptions;
@@ -15,21 +16,63 @@ using Telegram.Bot.Types.Enums;
 
 namespace Telegram.Bot.Advanced
 {
-    public class Dispatcher<T> where T : TelegramContext, new() {
+    public class Dispatcher<TContext, TController> : IDisposable 
+        where TContext : TelegramContext, new() 
+        where TController : class, ITelegramController, new() {
         private readonly IEnumerable<MethodInfo> _methods;
         private readonly ILogger _logger;
+        private IServiceProvider provider;
+        //private IServiceCollection services;
+        //private IServiceScope scope;
 
-        public Dispatcher(Type controller) {
+        public Dispatcher(IServiceProvider provider = null) {
+            this.provider = provider;
 
-            _methods = controller.GetMethods(BindingFlags.Public | BindingFlags.Static)
+            _methods = typeof(TController).GetMethods(BindingFlags.Public | BindingFlags.Static)
                                  .Where(m => m.GetCustomAttributes(typeof(DispatcherFilterAttribute), false).Length > 0);
 
             ILoggerFactory loggerFactory = new LoggerFactory();
-            _logger = loggerFactory.CreateLogger<Dispatcher<T>>();
+            _logger = loggerFactory.CreateLogger<Dispatcher<TContext, TController>>();
         }
 
         public void DispatchUpdate(Update update) {
-            using (T context = new T()) {
+            if (provider != null)
+            {
+                using (var scope = provider.CreateScope()) {
+                    Dispatch(scope.ServiceProvider.GetRequiredService<TController>(), update);
+                }
+            }
+            else {
+                Dispatch(new TController(), update);
+            }
+            
+        }
+
+        public async Task DispatchUpdateAsync(Update update)
+        {
+            if (provider != null)
+            {
+                using (var scope = provider.CreateScope())
+                {
+                    await DispatchAsync(scope.ServiceProvider.GetRequiredService<TController>(), update);
+                }
+            }
+            else
+            {
+                await DispatchAsync(new TController(), update);
+            }
+        }
+
+        private TController SetControllerData(TController controller, MessageCommand command, TelegramContext context,
+            TelegramChat chat) {
+            controller.MessageCommand = command;
+            controller.TelegramContext = context;
+            controller.TelegramChat = chat;
+            return controller;
+        }
+
+        private void Dispatch(TController controller, Update update) {
+            using (TContext context = new TContext()) {
                 Console.WriteLine($"Received update - ID: {update.Id}");
                 TelegramChat chat = null;
                 if (update.Type == UpdateType.Message) {
@@ -107,12 +150,14 @@ namespace Telegram.Bot.Advanced
                     command = new MessageCommand();
                 }
 
+                SetControllerData(controller, command, context, chat);
 
                 foreach (var method in _methods.Where(m => m.GetCustomAttributes()
                                                             .Where(att => att is DispatcherFilterAttribute)
                                                             .All(attr =>
                                                                 ((DispatcherFilterAttribute) attr).IsValid(update,
                                                                     chat, command))).ToArray()) {
+                    /*
                     var parameters = method.GetParameters();
                     if (!parameters.Any() || parameters[0].ParameterType != typeof(Update)) {
                         throw new InvalidRouteMethodArguments(parameters?[0], "The first parameter must be the Update");
@@ -123,7 +168,7 @@ namespace Telegram.Bot.Advanced
                         if (par.ParameterType == typeof(MessageCommand)) {
                             arguments.Add(command);
                         }
-                        else if (par.ParameterType == typeof(T)) {
+                        else if (par.ParameterType == typeof(TContext)) {
                             arguments.Add(context);
                         }
                         else if (par.ParameterType == typeof(TelegramChat)) {
@@ -133,8 +178,8 @@ namespace Telegram.Bot.Advanced
                             throw new InvalidRouteMethodArguments(par);
                         }
                     }
-
-                    method.Invoke(null, arguments.ToArray());
+                    */
+                    method.Invoke(controller, null);
                 }
 
                 try {
@@ -146,9 +191,9 @@ namespace Telegram.Bot.Advanced
             }
         }
 
-        public async Task DispatchUpdateAsync(Update update)
+        private async Task DispatchAsync(TController controller, Update update)
         {
-            using (T context = new T())
+            using (TContext context = new TContext())
             {
                 Console.WriteLine($"Received update - ID: {update.Id}");
                 TelegramChat chat = null;
@@ -242,6 +287,7 @@ namespace Telegram.Bot.Advanced
                     command = new MessageCommand();
                 }
 
+                SetControllerData(controller, command, context, chat);
 
                 foreach (var method in _methods.Where(m => m.GetCustomAttributes()
                                                             .Where(att => att is DispatcherFilterAttribute)
@@ -252,6 +298,7 @@ namespace Telegram.Bot.Advanced
                         ((AsyncStateMachineAttribute) m.GetCustomAttribute(typeof(AsyncStateMachineAttribute)) != null))
                     .ToArray())
                 {
+                    /*
                     var parameters = method.GetParameters();
                     if (!parameters.Any() || parameters[0].ParameterType != typeof(Update))
                     {
@@ -265,7 +312,7 @@ namespace Telegram.Bot.Advanced
                         {
                             arguments.Add(command);
                         }
-                        else if (par.ParameterType == typeof(T))
+                        else if (par.ParameterType == typeof(TContext))
                         {
                             arguments.Add(context);
                         }
@@ -278,8 +325,9 @@ namespace Telegram.Bot.Advanced
                             throw new InvalidRouteMethodArguments(par);
                         }
                     }
+                    */
 
-                    await (Task) method.Invoke(null, arguments.ToArray());
+                    await (Task) method.Invoke(controller, null);
                 }
 
                 try
@@ -291,6 +339,20 @@ namespace Telegram.Bot.Advanced
                     Console.WriteLine(e.Message);
                 }
             }
+        }
+
+        public void Dispose() {
+            
+        }
+    }
+
+    public static class Dispatcher {
+        public static IServiceCollection AddTelegramDispatcher<TContext, TController>(this IServiceCollection services) 
+            where TContext : TelegramContext, new() 
+            where TController : class, ITelegramController, new() {
+            services.AddSingleton<Dispatcher<TContext, TController>>();
+            services.AddScoped<TController>();
+            return services;
         }
     }
 }
