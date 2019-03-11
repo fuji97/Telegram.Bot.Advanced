@@ -2,9 +2,9 @@
 using Telegram.Bot.Advanced.Models;
 
 namespace Telegram.Bot.Advanced.Controller {
-    public interface ITelegramController {
+    public interface ITelegramController<TContext> where TContext : TelegramContext {
         MessageCommand MessageCommand { set; }
-        TelegramContext TelegramContext { set; }
+        TContext TelegramContext { set; }
         TelegramChat TelegramChat { set; }
     }
 }
