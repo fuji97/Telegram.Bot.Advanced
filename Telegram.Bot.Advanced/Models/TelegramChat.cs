@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.Exceptions;
@@ -88,12 +89,12 @@ namespace Telegram.Bot.Advanced.Models
             }
         }
 
-        public void Update(UserContext context) {
+        public void Update(TelegramContext context) {
             //context.Update(this);
             //context.SaveChanges();
         }
 
-        public bool Add(UserContext context) {
+        public bool Add(TelegramContext context) {
             var user = context.Users.FirstOrDefault(u => u.Id == Id);
             if (user == null) {
                 context.Add(this);
@@ -103,8 +104,26 @@ namespace Telegram.Bot.Advanced.Models
             return false;
         }
 
-        public static TelegramChat Get(UserContext context, long id) {
+        public async Task<bool> AddAsync(TelegramContext context)
+        {
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Id == Id);
+            if (user == null)
+            {
+                await context.AddAsync(this);
+                return true;
+            }
+
+            return false;
+        }
+
+        public static TelegramChat Get(TelegramContext context, long id) {
             var user = context.Users.Include(chat => chat.Data).FirstOrDefault(u => u.Id == id);
+            return user;
+        }
+
+        public static async Task<TelegramChat> GetAsync(TelegramContext context, long id)
+        {
+            var user = await context.Users.Include(chat => chat.Data).FirstOrDefaultAsync(u => u.Id == id);
             return user;
         }
 

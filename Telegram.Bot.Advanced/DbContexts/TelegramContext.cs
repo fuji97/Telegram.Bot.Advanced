@@ -6,12 +6,8 @@ using Telegram.Bot.Advanced.Models;
 
 namespace Telegram.Bot.Advanced.DbContexts
 {
-    public class UserContext : DbContext {
-        public UserContext () {}
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
-            optionsBuilder.UseSqlServer(@"Server=localhost\SQLEXPRESS;Database=telegram-bot;Trusted_Connection=True;");
-        }
+    public abstract class TelegramContext : DbContext {
+        public TelegramContext() {}
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             modelBuilder.Entity<Data>().HasKey(t => new { t.UserId, t.Key });

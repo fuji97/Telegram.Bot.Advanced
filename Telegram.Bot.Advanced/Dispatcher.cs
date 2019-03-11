@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.DispatcherFilters;
@@ -13,7 +15,7 @@ using Telegram.Bot.Types.Enums;
 
 namespace Telegram.Bot.Advanced
 {
-    public class Dispatcher<T> where T : UserContext, new() {
+    public class Dispatcher<T> where T : TelegramContext, new() {
         private readonly IEnumerable<MethodInfo> _methods;
         private readonly ILogger _logger;
 
@@ -27,7 +29,7 @@ namespace Telegram.Bot.Advanced
         }
 
         public void DispatchUpdate(Update update) {
-            using (UserContext context = new T()) {
+            using (T context = new T()) {
                 Console.WriteLine($"Received update - ID: {update.Id}");
                 TelegramChat chat = null;
                 if (update.Type == UpdateType.Message) {
@@ -138,7 +140,154 @@ namespace Telegram.Bot.Advanced
                 try {
                     context.SaveChanges();
                 }
-                catch (SqlException e) {
+                catch (Exception e) {
+                    Console.WriteLine(e.Message);
+                }
+            }
+        }
+
+        public async Task DispatchUpdateAsync(Update update)
+        {
+            using (T context = new T())
+            {
+                Console.WriteLine($"Received update - ID: {update.Id}");
+                TelegramChat chat = null;
+                if (update.Type == UpdateType.Message)
+                {
+                    var newChat = update.Message.Chat;
+                    chat = await TelegramChat.GetAsync(context, newChat.Id);
+
+                    if (chat != null)
+                    {
+                        var updated = false;
+                        if (newChat.Username != null && chat.Username == newChat.Username)
+                        {
+                            chat.Username = newChat.Username;
+                            updated = true;
+                        }
+
+                        if (newChat.Title != null && chat.Title == newChat.Title)
+                        {
+                            chat.Title = newChat.Title;
+                            updated = true;
+                        }
+
+                        if (newChat.Description != null && chat.Description == newChat.Description)
+                        {
+                            chat.Description = newChat.Description;
+                            updated = true;
+                        }
+
+                        if (newChat.InviteLink != null && chat.InviteLink == newChat.InviteLink)
+                        {
+                            chat.InviteLink = newChat.InviteLink;
+                            updated = true;
+                        }
+
+                        if (newChat.LastName != null && chat.LastName == newChat.LastName)
+                        {
+                            chat.LastName = newChat.LastName;
+                            updated = true;
+                        }
+
+                        if (newChat.StickerSetName != null && chat.StickerSetName == newChat.StickerSetName)
+                        {
+                            chat.StickerSetName = newChat.StickerSetName;
+                            updated = true;
+                        }
+
+                        if (newChat.FirstName != null && chat.FirstName == newChat.FirstName)
+                        {
+                            chat.FirstName = newChat.FirstName;
+                            updated = true;
+                        }
+
+                        if (newChat.CanSetStickerSet != null && chat.CanSetStickerSet == newChat.CanSetStickerSet)
+                        {
+                            chat.CanSetStickerSet = newChat.CanSetStickerSet;
+                            updated = true;
+                        }
+
+                        if (chat.AllMembersAreAdministrators == newChat.AllMembersAreAdministrators)
+                        {
+                            chat.AllMembersAreAdministrators = newChat.AllMembersAreAdministrators;
+                            updated = true;
+                        }
+
+                        if (updated)
+                            chat.Update(context);
+                    }
+                    else
+                    {
+                        chat = new TelegramChat(update.Message.Chat);
+                        await context.AddAsync(chat);
+                    }
+
+                    Console.WriteLine(
+                        $"Chat privata - Informazioni sull'utente: [{chat.Id}] @{chat.Username} State: {chat.State} - Role: {chat.Role}");
+                }
+
+                MessageCommand command;
+                if (update.Type == UpdateType.Message)
+                {
+                    command = update.Message.GetCommand();
+                    if (command.Target != null && command.Target != chat.Username)
+                    {
+                        Console.WriteLine($"Command's target is @{command.Target} - Ignoring command");
+                        return;
+                    }
+                }
+                else
+                {
+                    command = new MessageCommand();
+                }
+
+
+                foreach (var method in _methods.Where(m => m.GetCustomAttributes()
+                                                            .Where(att => att is DispatcherFilterAttribute)
+                                                            .All(attr =>
+                                                                ((DispatcherFilterAttribute)attr).IsValid(update,
+                                                                    chat, command)))
+                    .Where(m => 
+                        ((AsyncStateMachineAttribute) m.GetCustomAttribute(typeof(AsyncStateMachineAttribute)) != null))
+                    .ToArray())
+                {
+                    var parameters = method.GetParameters();
+                    if (!parameters.Any() || parameters[0].ParameterType != typeof(Update))
+                    {
+                        throw new InvalidRouteMethodArguments(parameters?[0], "The first parameter must be the Update");
+                    }
+
+                    var arguments = new List<Object> { update };
+                    foreach (var par in parameters.Skip(1))
+                    {
+                        if (par.ParameterType == typeof(MessageCommand))
+                        {
+                            arguments.Add(command);
+                        }
+                        else if (par.ParameterType == typeof(T))
+                        {
+                            arguments.Add(context);
+                        }
+                        else if (par.ParameterType == typeof(TelegramChat))
+                        {
+                            arguments.Add(chat);
+                        }
+                        else
+                        {
+                            throw new InvalidRouteMethodArguments(par);
+                        }
+                    }
+
+                    await (Task) method.Invoke(null, arguments.ToArray());
+                }
+
+                try
+                {
+                    context.SaveChanges();
+                }
+                catch (Exception e)
+                {
                     Console.WriteLine(e.Message);
                 }
             }

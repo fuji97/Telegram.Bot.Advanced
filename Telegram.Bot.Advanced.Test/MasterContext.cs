@@ -7,7 +7,7 @@ using Telegram.Bot.Advanced.DbContexts;
 
 namespace Telegram.Bot.Advanced.Test
 {
-    class MasterContext : UserContext {
+    class MasterContext : TelegramContext {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(@"Server=localhost\SQLEXPRESS;Database=telegram-bot;Trusted_Connection=True;");
