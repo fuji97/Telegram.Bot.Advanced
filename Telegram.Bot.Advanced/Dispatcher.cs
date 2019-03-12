@@ -10,15 +10,16 @@ using Telegram.Bot.Advanced.Controller;
 using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.DispatcherFilters;
 using Telegram.Bot.Advanced.Exceptions;
+using Telegram.Bot.Advanced.Extensions;
 using Telegram.Bot.Advanced.Models;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
 namespace Telegram.Bot.Advanced
 {
-    public class Dispatcher<TContext, TController> : IDisposable 
+    public class Dispatcher<TContext, TController> : IDisposable, IDispatcher
         where TContext : TelegramContext, new() 
-        where TController : class, ITelegramController, new() {
+        where TController : class, ITelegramController<TContext>, new() {
         private readonly IEnumerable<MethodInfo> _methods;
         private readonly ILogger _logger;
         private IServiceProvider provider;
@@ -63,7 +64,7 @@ namespace Telegram.Bot.Advanced
             }
         }
 
-        private TController SetControllerData(TController controller, MessageCommand command, TelegramContext context,
+        private TController SetControllerData(TController controller, MessageCommand command, TContext context,
             TelegramChat chat) {
             controller.MessageCommand = command;
             controller.TelegramContext = context;
@@ -349,7 +350,7 @@ namespace Telegram.Bot.Advanced
     public static class Dispatcher {
         public static IServiceCollection AddTelegramDispatcher<TContext, TController>(this IServiceCollection services) 
             where TContext : TelegramContext, new() 
-            where TController : class, ITelegramController, new() {
+            where TController : class, ITelegramController<TContext>, new() {
             services.AddSingleton<Dispatcher<TContext, TController>>();
             services.AddScoped<TController>();
             return services;

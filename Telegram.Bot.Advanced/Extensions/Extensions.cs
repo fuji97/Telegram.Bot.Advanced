@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using Telegram.Bot.Types;
 
-namespace Telegram.Bot.Advanced
+namespace Telegram.Bot.Advanced.Extensions
 {
     public static class Extensions {
         public static MessageCommand GetCommand(this Message message) {
