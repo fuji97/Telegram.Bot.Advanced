@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Advanced.Controller;
 using Telegram.Bot.Advanced.DbContexts;
@@ -62,6 +63,10 @@ namespace Telegram.Bot.Advanced
             {
                 await DispatchAsync(new TController(), update);
             }
+        }
+
+        public void RegisterController(IServiceCollection services) {
+            services.TryAddScoped<TController>();
         }
 
         private TController SetControllerData(TController controller, MessageCommand command, TContext context,
@@ -355,5 +360,7 @@ namespace Telegram.Bot.Advanced
             services.AddScoped<TController>();
             return services;
         }
+        
+        //public async static Task<IActionResult> 
     }
 }
