@@ -9,6 +9,6 @@ namespace Telegram.Bot.Advanced.Controller {
         MessageCommand MessageCommand { set; }
         TContext TelegramContext { set; }
         TelegramChat TelegramChat { set; }
-        TelegramBotData BotData { set; }
+        ITelegramBotData BotData { set; }
     }
 }

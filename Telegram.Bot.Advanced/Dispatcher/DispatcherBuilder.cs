@@ -7,10 +7,10 @@ namespace Telegram.Bot.Advanced.Dispatcher {
         where TContext : TelegramContext, new()
         where TController : class, ITelegramController<TContext> {
 
-        private TelegramBotData _botData;
+        private ITelegramBotData _botData;
 
 
-        public IDispatcherBuilder SetTelegramBotData(TelegramBotData botData) {
+        public IDispatcherBuilder SetTelegramBotData(ITelegramBotData botData) {
             _botData = botData;
             return this;
         }

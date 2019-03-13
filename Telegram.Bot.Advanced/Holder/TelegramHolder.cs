@@ -6,20 +6,20 @@ using Telegram.Bot.Advanced.DbContexts;
 
 namespace Telegram.Bot.Advanced.Holder {
     public class TelegramHolder : ITelegramHolder {
-        private Dictionary<string, TelegramBotData> Bots { get; }
+        private Dictionary<string, ITelegramBotData> Bots { get; }
 
-        public TelegramHolder(IEnumerable<TelegramBotData> bots) {
-            Bots = new Dictionary<string, TelegramBotData>();
+        public TelegramHolder(IEnumerable<ITelegramBotData> bots) {
+            Bots = new Dictionary<string, ITelegramBotData>();
             foreach (var bot in bots) {
                 Bots[bot.Endpoint] = bot;
             }
         }
 
-        public TelegramBotData Get(string key) {
+        public ITelegramBotData Get(string key) {
             return Bots[key];
         }
 
-        public IEnumerator<TelegramBotData> GetEnumerator() {
+        public IEnumerator<ITelegramBotData> GetEnumerator() {
             return Bots.Select(pair => pair.Value).GetEnumerator();
         }
 

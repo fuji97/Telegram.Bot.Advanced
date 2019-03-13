@@ -9,7 +9,7 @@ using Telegram.Bot.Advanced.Holder;
 namespace Telegram.Bot.Advanced.Extensions {
     public static class ServiceCollectionExtensions {
         public static IServiceCollection AddTelegramHolder(this IServiceCollection services,
-            IEnumerable<TelegramBotData> bots) {
+            params ITelegramBotData[] bots) {
             services.AddSingleton<ITelegramHolder, TelegramHolder>(
                 holder => new TelegramHolder(bots)
             );

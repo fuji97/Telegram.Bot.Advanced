@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.Advanced.Dispatcher;
 using Telegram.Bot.Advanced.Extensions;
@@ -10,17 +10,28 @@ using TestServer;
 
 namespace Telegram.Bot.Advanced.TestServer {
     public class Startup {
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
-        // TODO Insert bot key
+        private readonly IConfiguration _configuration;
+
+        public Startup(IConfiguration configuration) {
+            _configuration = configuration;
+        }
+        
         public void ConfigureServices(IServiceCollection services) {
             services.AddEntityFrameworkInMemoryDatabase();
-            services.AddTelegramHolder( new TelegramBotData[] {
-                new TelegramBotData(new TelegramBotClient("XXXXXXXXXXXXXXXXXXXXXXXXXXX"),
-                    new DispatcherBuilder<TestTelegramContext, TelegramTestController>(),
-                    "test",
-                    "/proxy/telegram")
-            });
+            services.AddTelegramHolder(
+                new TelegramBotDataBuilder()
+                    .CreateTelegramBotClient(_configuration["TELEGRAM_BOT_KEY"])
+                    .UseDispatcherBuilder(new DispatcherBuilder<TestTelegramContext, TelegramTestController>())
+                    .SetBasePath(_configuration["Telegram:Webhook"])
+                    .Build()
+                 );
+            
+            /*
+            services.AddTelegramHolder(new TelegramBotData(new TelegramBotClient(_configuration["TELEGRAM_BOT_KEY"]),
+                new DispatcherBuilder<TestTelegramContext, TelegramTestController>(),
+                _configuration["TELEGRAM_BOT_KEY"],
+                _configuration["Telegram:Webhook"]));
+            */
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
@@ -32,7 +43,6 @@ namespace Telegram.Bot.Advanced.TestServer {
             }
 
             app.UseTelegramRouting();
-            //app.Run(async (context) => { await context.Response.WriteAsync("Hello World!"); });
             app.UseMvc();
         }
     }

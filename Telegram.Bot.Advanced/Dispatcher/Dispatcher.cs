@@ -25,12 +25,12 @@ namespace Telegram.Bot.Advanced.Dispatcher
         private readonly IEnumerable<MethodInfo> _methods;
         private readonly ILogger _logger;
 
-        private readonly TelegramBotData _botData;
+        private readonly ITelegramBotData _botData;
         //private IServiceProvider provider;
         //private IServiceCollection services;
         //private IServiceScope scope;
 
-        public Dispatcher(TelegramBotData botData) {
+        public Dispatcher(ITelegramBotData botData) {
             _botData = botData;
             _methods = typeof(TController).GetMethods(BindingFlags.Public | BindingFlags.Instance);
                                  //.Where(m => m.GetCustomAttributes(typeof(DispatcherFilterAttribute), false).Length > 0);
@@ -72,7 +72,7 @@ namespace Telegram.Bot.Advanced.Dispatcher
         }
 
         private TController SetControllerData(TController controller, MessageCommand command, TContext context,
-            TelegramChat chat, TelegramBotData botData) {
+            TelegramChat chat, ITelegramBotData botData) {
             controller.MessageCommand = command;
             controller.TelegramContext = context;
             controller.TelegramChat = chat;
@@ -166,7 +166,7 @@ namespace Telegram.Bot.Advanced.Dispatcher
                                                             .Where(att => att is DispatcherFilterAttribute)
                                                             .All(attr =>
                                                                 ((DispatcherFilterAttribute) attr).IsValid(update,
-                                                                    chat, command))).ToArray()) {
+                                                                    chat, command, _botData))).ToArray()) {
                     /*
                     var parameters = method.GetParameters();
                     if (!parameters.Any() || parameters[0].ParameterType != typeof(Update)) {
@@ -307,7 +307,7 @@ namespace Telegram.Bot.Advanced.Dispatcher
                                                             .Where(att => att is DispatcherFilterAttribute)
                                                             .All(attr =>
                                                                 ((DispatcherFilterAttribute)attr).IsValid(update,
-                                                                    chat, command)))
+                                                                    chat, command, _botData)))
                     .Where(m => 
                         ((AsyncStateMachineAttribute) m.GetCustomAttribute(typeof(AsyncStateMachineAttribute)) != null))
                     .ToArray())

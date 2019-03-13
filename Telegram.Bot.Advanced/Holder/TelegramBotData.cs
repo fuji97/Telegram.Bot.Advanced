@@ -3,7 +3,7 @@ using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.Dispatcher;
 
 namespace Telegram.Bot.Advanced.Holder {
-    public class TelegramBotData {
+    public class TelegramBotData : ITelegramBotData {
         public string Endpoint { get; }
         public ITelegramBotClient Bot { get; }
         public IDispatcher Dispatcher { get; }
