@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27428.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Telegram.Bot.Advanced", "Telegram.Bot.Advanced\Telegram.Bot.Advanced.csproj", "{B53A96EB-DF09-4EF1-B72C-407F0B9D75EF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Telegram.Bot.Advanced.TestServer", "Telegram.Bot.Advanced.TestServer\Telegram.Bot.Advanced.TestServer.csproj", "{5001F812-7353-4A77-889A-CCD198FE2A25}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{B53A96EB-DF09-4EF1-B72C-407F0B9D75EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B53A96EB-DF09-4EF1-B72C-407F0B9D75EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B53A96EB-DF09-4EF1-B72C-407F0B9D75EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5001F812-7353-4A77-889A-CCD198FE2A25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5001F812-7353-4A77-889A-CCD198FE2A25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5001F812-7353-4A77-889A-CCD198FE2A25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5001F812-7353-4A77-889A-CCD198FE2A25}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
