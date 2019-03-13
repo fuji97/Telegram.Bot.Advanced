@@ -13,6 +13,7 @@ using Telegram.Bot.Advanced.Controller;
 using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.Holder;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.InputFiles;
 
 namespace Telegram.Bot.Advanced.Middlewares {
     class TelegramRouting {
@@ -24,7 +25,7 @@ namespace Telegram.Bot.Advanced.Middlewares {
             this.endpoint = endpoint;
         }
 
-        public async Task InvokeAsync(HttpContext context, IServiceProvider serviceProvider, ITelegramHolder holder,
+        public async Task InvokeAsync(HttpContext context, ITelegramHolder holder, IServiceProvider provider,
             ILogger<TelegramRouting> logger) {
             Update update;
             var serializer = new JsonSerializer();
@@ -41,10 +42,11 @@ namespace Telegram.Bot.Advanced.Middlewares {
 
             var botData = holder.Get(endpoint);
             if (botData != null) {
-                await botData.Dispatcher.DispatchUpdateAsync(update);
+                await botData.Dispatcher.DispatchUpdateAsync(update, provider);
             }
 
             context.Response.StatusCode = 200;
+            await context.Response.WriteAsync("Ok");
         }
     }
 }

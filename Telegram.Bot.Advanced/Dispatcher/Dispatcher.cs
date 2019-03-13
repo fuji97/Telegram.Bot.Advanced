@@ -7,37 +7,39 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Telegram.Bot.Advanced.Controller;
 using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.DispatcherFilters;
-using Telegram.Bot.Advanced.Exceptions;
 using Telegram.Bot.Advanced.Extensions;
+using Telegram.Bot.Advanced.Holder;
 using Telegram.Bot.Advanced.Models;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
-namespace Telegram.Bot.Advanced
+namespace Telegram.Bot.Advanced.Dispatcher
 {
     public class Dispatcher<TContext, TController> : IDisposable, IDispatcher
         where TContext : TelegramContext, new() 
-        where TController : class, ITelegramController<TContext>, new() {
+        where TController : class, ITelegramController<TContext> {
         private readonly IEnumerable<MethodInfo> _methods;
         private readonly ILogger _logger;
-        private IServiceProvider provider;
+
+        private readonly TelegramBotData _botData;
+        //private IServiceProvider provider;
         //private IServiceCollection services;
         //private IServiceScope scope;
 
-        public Dispatcher(IServiceProvider provider = null) {
-            this.provider = provider;
-
-            _methods = typeof(TController).GetMethods(BindingFlags.Public | BindingFlags.Static)
-                                 .Where(m => m.GetCustomAttributes(typeof(DispatcherFilterAttribute), false).Length > 0);
+        public Dispatcher(TelegramBotData botData) {
+            _botData = botData;
+            _methods = typeof(TController).GetMethods(BindingFlags.Public | BindingFlags.Instance);
+                                 //.Where(m => m.GetCustomAttributes(typeof(DispatcherFilterAttribute), false).Length > 0);
 
             ILoggerFactory loggerFactory = new LoggerFactory();
             _logger = loggerFactory.CreateLogger<Dispatcher<TContext, TController>>();
         }
 
-        public void DispatchUpdate(Update update) {
+        public void DispatchUpdate(Update update, IServiceProvider provider) {
             if (provider != null)
             {
                 using (var scope = provider.CreateScope()) {
@@ -45,12 +47,12 @@ namespace Telegram.Bot.Advanced
                 }
             }
             else {
-                Dispatch(new TController(), update);
+                //Dispatch(new TController(), update);
             }
             
         }
 
-        public async Task DispatchUpdateAsync(Update update)
+        public async Task DispatchUpdateAsync(Update update, IServiceProvider provider)
         {
             if (provider != null)
             {
@@ -61,7 +63,7 @@ namespace Telegram.Bot.Advanced
             }
             else
             {
-                await DispatchAsync(new TController(), update);
+                //await DispatchAsync(new TController(), update);
             }
         }
 
@@ -70,10 +72,12 @@ namespace Telegram.Bot.Advanced
         }
 
         private TController SetControllerData(TController controller, MessageCommand command, TContext context,
-            TelegramChat chat) {
+            TelegramChat chat, TelegramBotData botData) {
             controller.MessageCommand = command;
             controller.TelegramContext = context;
             controller.TelegramChat = chat;
+            controller.BotData = botData;
+            
             return controller;
         }
 
@@ -156,7 +160,7 @@ namespace Telegram.Bot.Advanced
                     command = new MessageCommand();
                 }
 
-                SetControllerData(controller, command, context, chat);
+                SetControllerData(controller, command, context, chat, _botData);
 
                 foreach (var method in _methods.Where(m => m.GetCustomAttributes()
                                                             .Where(att => att is DispatcherFilterAttribute)
@@ -293,7 +297,11 @@ namespace Telegram.Bot.Advanced
                     command = new MessageCommand();
                 }
 
-                SetControllerData(controller, command, context, chat);
+                SetControllerData(controller, command, context, chat, _botData);
+                //JsonSerializer serializer = new JsonSerializer();;
+                Console.WriteLine($"Command: {JsonConvert.SerializeObject(command, Formatting.Indented)}");
+                Console.WriteLine($"Chat: {JsonConvert.SerializeObject(chat, Formatting.Indented)}");
+                //Console.WriteLine($"Command: {JsonConvert.SerializeObject(command, Formatting.Indented)}");
 
                 foreach (var method in _methods.Where(m => m.GetCustomAttributes()
                                                             .Where(att => att is DispatcherFilterAttribute)
@@ -332,7 +340,7 @@ namespace Telegram.Bot.Advanced
                         }
                     }
                     */
-
+                    Console.WriteLine($"Calling method: {method.Name}");
                     await (Task) method.Invoke(controller, null);
                 }
 
@@ -344,6 +352,8 @@ namespace Telegram.Bot.Advanced
                 {
                     Console.WriteLine(e.Message);
                 }
+
+                Console.WriteLine("Fine dispatcher");
             }
         }
 

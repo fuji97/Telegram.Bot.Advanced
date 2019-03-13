@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Advanced.Controller;
@@ -8,12 +9,11 @@ using Telegram.Bot.Types;
 
 namespace TestServer {
     public class TelegramTestController : TelegramController<TestTelegramContext> {
-        public ITelegramBotClient Bot { get; set; }
-
 
         [CommandFilter("help")]
         public async Task Help() {
-            await Bot.SendTextMessageAsync(TelegramChat.Id, "Hello World");
+            Console.WriteLine("Hello World");
+            await BotData.Bot.SendTextMessageAsync(TelegramChat.Id, "Hello World");
         }
     }
 }

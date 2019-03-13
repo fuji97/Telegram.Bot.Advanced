@@ -17,7 +17,7 @@ namespace Telegram.Bot.Advanced.Extensions {
 
             foreach (var bot in holder) {
                 app.Map(Path.Combine(bot.BasePath, bot.Endpoint), 
-                    builder => builder.UseMiddleware<TelegramRouting>(holder));
+                    builder => builder.UseMiddleware<TelegramRouting>(bot.Endpoint));
             }
             return app;
         }

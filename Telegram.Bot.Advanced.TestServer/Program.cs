@@ -7,6 +7,7 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Telegram.Bot.Advanced.TestServer;
 
 namespace TestServer {
     public class Program {
@@ -16,6 +17,7 @@ namespace TestServer {
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .UseUrls("http://0.0.0.0:5010")
                 .UseStartup<Startup>();
     }
 }

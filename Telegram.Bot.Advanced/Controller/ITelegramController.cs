@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.Extensions;
+using Telegram.Bot.Advanced.Holder;
 using Telegram.Bot.Advanced.Models;
 
 namespace Telegram.Bot.Advanced.Controller {
@@ -8,6 +9,6 @@ namespace Telegram.Bot.Advanced.Controller {
         MessageCommand MessageCommand { set; }
         TContext TelegramContext { set; }
         TelegramChat TelegramChat { set; }
-        IServiceScope Services { set; }
+        TelegramBotData BotData { set; }
     }
 }
