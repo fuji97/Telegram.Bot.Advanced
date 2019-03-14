@@ -10,7 +10,7 @@ namespace Telegram.Bot.Advanced.TestServer {
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseUrls("http://0.0.0.0:5010")
+                //.UseUrls("http://0.0.0.0:5000")
                 .ConfigureLogging((hostingContext, logging) =>
                 {
                     logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));

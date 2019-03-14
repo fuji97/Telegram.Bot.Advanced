@@ -15,7 +15,7 @@ namespace Telegram.Bot.Advanced.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public long Id { get; }
+        public long Id { get; set; }
         public string Username { get; set; }
         public int State { get; set; } = 0;
         public ChatType Type { get; set; }

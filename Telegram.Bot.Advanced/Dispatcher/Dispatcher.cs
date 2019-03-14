@@ -149,34 +149,24 @@ namespace Telegram.Bot.Advanced.Dispatcher
                 }
 
                 SetControllerData(controller, command, context, chat, _botData);
+                
+                try {
+                    context.SaveChanges();
+                }
+                catch (Exception e) {
+                    _logger.LogError(e.Message);
+                }
+                
+                _logger.LogDebug($"Command: {JsonConvert.SerializeObject(command, Formatting.Indented)}");
+                _logger.LogDebug($"Chat: {JsonConvert.SerializeObject(chat, Formatting.Indented)}");
+
+                bool executed = false;
 
                 foreach (var method in _methods.Where(m => m.GetCustomAttributes()
                                                             .Where(att => att is DispatcherFilterAttribute)
                                                             .All(attr =>
                                                                 ((DispatcherFilterAttribute) attr).IsValid(update,
                                                                     chat, command, _botData))).ToArray()) {
-                    /*
-                    var parameters = method.GetParameters();
-                    if (!parameters.Any() || parameters[0].ParameterType != typeof(Update)) {
-                        throw new InvalidRouteMethodArguments(parameters?[0], "The first parameter must be the Update");
-                    }
-
-                    var arguments = new List<Object> {update};
-                    foreach (var par in parameters.Skip(1)) {
-                        if (par.ParameterType == typeof(MessageCommand)) {
-                            arguments.Add(command);
-                        }
-                        else if (par.ParameterType == typeof(TContext)) {
-                            arguments.Add(context);
-                        }
-                        else if (par.ParameterType == typeof(TelegramChat)) {
-                            arguments.Add(chat);
-                        }
-                        else {
-                            throw new InvalidRouteMethodArguments(par);
-                        }
-                    }
-                    */
                     method.Invoke(controller, null);
                 }
 
@@ -184,7 +174,11 @@ namespace Telegram.Bot.Advanced.Dispatcher
                     context.SaveChanges();
                 }
                 catch (Exception e) {
-                    Console.WriteLine(e.Message);
+                    _logger.LogError(e.Message);
+                }
+                
+                if (!executed) {
+                    _logger.LogInformation("No valid method found to manage current request.");
                 }
             }
         }
@@ -272,6 +266,16 @@ namespace Telegram.Bot.Advanced.Dispatcher
                 }
 
                 SetControllerData(controller, command, context, chat, _botData);
+                
+                try
+                {
+                    context.SaveChanges();
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e.Message);
+                }
+                
                 _logger.LogDebug($"Command: {JsonConvert.SerializeObject(command, Formatting.Indented)}");
                 _logger.LogDebug($"Chat: {JsonConvert.SerializeObject(chat, Formatting.Indented)}");
 

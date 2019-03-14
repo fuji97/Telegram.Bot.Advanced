@@ -10,6 +10,7 @@ using Telegram.Bot.Types;
 namespace Telegram.Bot.Advanced.Middlewares {
     public class TelegramRouting {
         private readonly string _endpoint;
+        private int? _lastUpdateId = null;
 
         public TelegramRouting(RequestDelegate request, string endpoint) {
             _endpoint = endpoint;
@@ -17,6 +18,7 @@ namespace Telegram.Bot.Advanced.Middlewares {
 
         public async Task InvokeAsync(HttpContext context, ITelegramHolder holder, IServiceProvider provider,
             ILogger<TelegramRouting> logger) {
+            
             Update update;
             var serializer = new JsonSerializer();
 
@@ -26,13 +28,23 @@ namespace Telegram.Bot.Advanced.Middlewares {
                 update = serializer.Deserialize<Update>(jsonTextReader);
             }
 
-            if (update == null) {
-                logger.LogError("Can not parse webhook request into Update");
+            if (update != null) {
+                // Avoid multiple dispatching of the same update in case of delays
+                if (_lastUpdateId.GetValueOrDefault(-1) != update.Id) {
+                    var botData = holder.Get(_endpoint);
+                    if (botData != null) {
+                        await botData.Dispatcher.DispatchUpdateAsync(update, provider);
+                    }
+                    else {
+                        logger.LogWarning("No bots found that can manage this request");
+                    }
+                }
+                else {
+                    logger.LogInformation("Duplicate update received - Ignoring...");
+                }
             }
-
-            var botData = holder.Get(_endpoint);
-            if (botData != null) {
-                await botData.Dispatcher.DispatchUpdateAsync(update, provider);
+            else {
+                logger.LogError("Can not parse webhook request into Update");
             }
 
             context.Response.StatusCode = 200;
