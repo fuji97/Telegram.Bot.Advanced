@@ -1,9 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Telegram.Bot.Advanced.Controller;
-using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Types;
 
 namespace Telegram.Bot.Advanced.Dispatcher {

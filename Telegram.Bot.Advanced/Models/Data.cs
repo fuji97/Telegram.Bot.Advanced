@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Telegram.Bot.Advanced.Models
 {
@@ -32,12 +28,26 @@ namespace Telegram.Bot.Advanced.Models
             return false;
         }
 
+        protected bool Equals(Data other) {
+            return UserId == other.UserId && string.Equals(Key, other.Key) && string.Equals(Value, other.Value);
+        }
+
+        public override int GetHashCode() {
+            unchecked {
+                var hashCode = UserId.GetHashCode();
+                hashCode = (hashCode * 397) ^ (Key != null ? Key.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Value != null ? Value.GetHashCode() : 0);
+                return hashCode;
+            }
+        }
+
         public static bool operator ==(Data left, Data right) {
             if (ReferenceEquals(null, left) && ReferenceEquals(null, right))
             {
                 return false;
             }
-            else if (ReferenceEquals(null, left) || ReferenceEquals(null, right))
+
+            if (ReferenceEquals(null, left) || ReferenceEquals(null, right))
             {
                 return true;
             }
@@ -48,19 +58,12 @@ namespace Telegram.Bot.Advanced.Models
         {
             if (ReferenceEquals(null, left) && ReferenceEquals(null, right)) {
                 return false;
-            } else if (ReferenceEquals(null, left) || ReferenceEquals(null, right)) {
+            }
+
+            if (ReferenceEquals(null, left) || ReferenceEquals(null, right)) {
                 return true;
             }
             return !left.Equals(right);
-        }
-
-        public override int GetHashCode() {
-            unchecked {
-                var hashCode = (UserId.GetHashCode());
-                hashCode = (hashCode * 397) ^ (Key != null ? Key.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (Value != null ? Value.GetHashCode() : 0);
-                return hashCode;
-            }
         }
     }
 }

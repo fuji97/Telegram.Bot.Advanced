@@ -40,7 +40,7 @@ namespace Telegram.Bot.Advanced.Holder {
         }
 
         public TelegramBotDataBuilder SetBasePath(string path) {
-            _basePath = _basePath;
+            _basePath = path;
 
             return this;
         }
@@ -49,9 +49,8 @@ namespace Telegram.Bot.Advanced.Holder {
             if (_builder != null) {
                 return new TelegramBotData(_bot, _builder, _endpoint, _basePath);
             }
-            else {
-                return new TelegramBotData(_bot, _dispatcher, _endpoint, _basePath);
-            }
+
+            return new TelegramBotData(_bot, _dispatcher, _endpoint, _basePath);
         }
     }
 }

@@ -2,14 +2,9 @@
 using System.IO;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Telegram.Bot.Advanced.Controller;
-using Telegram.Bot.Advanced.DbContexts;
-using Telegram.Bot.Advanced.Dispatcher;
 using Telegram.Bot.Advanced.Exceptions;
 using Telegram.Bot.Advanced.Holder;
 using Telegram.Bot.Advanced.Middlewares;
-using Telegram.Bot.Args;
 using Telegram.Bot.Types.Enums;
 
 namespace Telegram.Bot.Advanced.Extensions {

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Telegram.Bot.Advanced.Controller;
-using Telegram.Bot.Advanced.DbContexts;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.Advanced.Holder;
 
 namespace Telegram.Bot.Advanced.Extensions {

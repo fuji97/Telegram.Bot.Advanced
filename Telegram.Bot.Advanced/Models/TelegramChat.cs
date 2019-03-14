@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.Exceptions;
-using Telegram.Bot.Requests;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -18,7 +15,7 @@ namespace Telegram.Bot.Advanced.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public long Id { get; set; }
+        public long Id { get; }
         public string Username { get; set; }
         public int State { get; set; } = 0;
         public ChatType Type { get; set; }
@@ -26,7 +23,7 @@ namespace Telegram.Bot.Advanced.Models
         public string Title { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public bool AllMembersAreAdministrators { get; set; } = false;
+        public bool AllMembersAreAdministrators { get; set; }
         public string Description { get; set; }
         public string InviteLink { get; set; }
         public string StickerSetName { get; set; }
@@ -89,31 +86,21 @@ namespace Telegram.Bot.Advanced.Models
             }
         }
 
-        public void Update(TelegramContext context) {
-            //context.Update(this);
-            //context.SaveChanges();
-        }
-
         public bool Add(TelegramContext context) {
             var user = context.Users.FirstOrDefault(u => u.Id == Id);
-            if (user == null) {
-                context.Add(this);
-                return true;
-            }
+            if (user != null) return false;
+            context.Add(this);
+            return true;
 
-            return false;
         }
 
         public async Task<bool> AddAsync(TelegramContext context)
         {
             var user = await context.Users.FirstOrDefaultAsync(u => u.Id == Id);
-            if (user == null)
-            {
-                await context.AddAsync(this);
-                return true;
-            }
+            if (user != null) return false;
+            await context.AddAsync(this);
+            return true;
 
-            return false;
         }
 
         public static TelegramChat Get(TelegramContext context, long id) {
@@ -127,23 +114,19 @@ namespace Telegram.Bot.Advanced.Models
             return user;
         }
 
-        public override bool Equals(Object obj) {
+        public override bool Equals(object obj) {
             if (obj is TelegramChat chat)
                 return Id == chat.Id;
             return false;
         }
 
-       
-
-        /*
-        public bool IsDifferent(User user) {
-            return !(Id != user.Id 
-                || Username != user.Username 
-                || State != user.State 
-                || Role != user.Role 
-                || !Data.SequenceEqual(user.Data));
+        protected bool Equals(TelegramChat other) {
+            return Id == other.Id;
         }
-        */
+
+        public override int GetHashCode() {
+            return Id.GetHashCode();
+        }
 
     }
 

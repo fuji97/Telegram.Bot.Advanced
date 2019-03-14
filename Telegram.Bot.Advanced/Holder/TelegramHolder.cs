@@ -1,8 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Telegram.Bot.Advanced.Controller;
-using Telegram.Bot.Advanced.DbContexts;
 
 namespace Telegram.Bot.Advanced.Holder {
     public class TelegramHolder : ITelegramHolder {

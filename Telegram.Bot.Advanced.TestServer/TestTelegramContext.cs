@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Telegram.Bot.Advanced.DbContexts;
 
-namespace TestServer {
+namespace Telegram.Bot.Advanced.TestServer {
     public class TestTelegramContext : TelegramContext {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
             base.OnConfiguring(optionsBuilder);

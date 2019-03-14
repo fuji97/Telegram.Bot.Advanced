@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot.Advanced.Dispatcher;
 using Telegram.Bot.Advanced.Extensions;
 using Telegram.Bot.Advanced.Holder;
-using TestServer;
 
 namespace Telegram.Bot.Advanced.TestServer {
     public class Startup {

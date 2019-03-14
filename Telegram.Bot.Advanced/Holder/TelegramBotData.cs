@@ -1,6 +1,4 @@
-﻿using Telegram.Bot.Advanced.Controller;
-using Telegram.Bot.Advanced.DbContexts;
-using Telegram.Bot.Advanced.Dispatcher;
+﻿using Telegram.Bot.Advanced.Dispatcher;
 
 namespace Telegram.Bot.Advanced.Holder {
     public class TelegramBotData : ITelegramBotData {
