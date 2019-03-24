@@ -4,16 +4,20 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Telegram.Bot.Advanced.Dispatcher;
 using Telegram.Bot.Advanced.Extensions;
 using Telegram.Bot.Advanced.Holder;
+using Telegram.Bot.Advanced.TestServer.TelegramController;
 
 namespace Telegram.Bot.Advanced.TestServer {
     public class Startup {
         private readonly IConfiguration _configuration;
+        private readonly ILogger<Dispatcher<TestTelegramContext, TelegramPollingController>> _pollingLogger;
 
-        public Startup(IConfiguration configuration) {
+        public Startup(IConfiguration configuration, ILogger<Dispatcher<TestTelegramContext, TelegramPollingController>> pollingLogger) {
             _configuration = configuration;
+            _pollingLogger = pollingLogger;
         }
         
         public void ConfigureServices(IServiceCollection services) {
@@ -23,7 +27,7 @@ namespace Telegram.Bot.Advanced.TestServer {
             services.AddTelegramHolder(
                 new TelegramBotDataBuilder()
                     .CreateTelegramBotClient(_configuration["TELEGRAM_BOT_KEY"])
-                    .UseDispatcherBuilder(new DispatcherBuilder<TestTelegramContext, TelegramTestController>())
+                    .UseDispatcherBuilder(new DispatcherBuilder<TestTelegramContext, TelegramPollingController>().SetLogger(_pollingLogger))
                     .SetBasePath(_configuration["Telegram:Webhook"])
                     .Build()
                  );
@@ -44,7 +48,8 @@ namespace Telegram.Bot.Advanced.TestServer {
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseTelegramRouting();
+            //app.UseTelegramRouting();
+            app.UseTelegramPolling();
             app.UseMvc();
         }
     }

@@ -13,6 +13,7 @@ namespace Telegram.Bot.Advanced.Extensions
             var match = Regex.Match(message.Text, @"^\/([^@\s]+)@?(?:(\S+)|)\s?([\s\S]*)$");
             
             var command = new MessageCommand {
+                Text = message.Text,
                 Command = match.Groups[1].Success ? match.Groups[1].Value : null,
                 Target = match.Groups[2].Success ? match.Groups[2].Value : null,
                 Parameters = new List<string>(match.Groups[3].Value.Split(" ").Where(s => s != ""))
@@ -26,6 +27,7 @@ namespace Telegram.Bot.Advanced.Extensions
         public string Command { get; set; }
         public string Target { get; set; }
         public List<string> Parameters { get; set; } = new List<string>();
+        public string Text { get; set; }
 
         public bool IsCommand() {
             return Command != null; 
