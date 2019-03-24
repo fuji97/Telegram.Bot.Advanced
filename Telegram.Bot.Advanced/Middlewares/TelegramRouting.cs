@@ -44,7 +44,7 @@ namespace Telegram.Bot.Advanced.Middlewares {
                 }
             }
             else {
-                logger.LogError("Can not parse webhook request into Update");
+                logger.LogError("Cannot parse webhook request into Update");
             }
 
             context.Response.StatusCode = 200;

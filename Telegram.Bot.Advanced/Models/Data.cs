@@ -9,14 +9,11 @@ namespace Telegram.Bot.Advanced.Models
         [Key]
         public string Key { get; set; }
         public string Value { get; set; }
-        [ForeignKey("UserId")]
-        public TelegramChat User { get; set; }
 
         public Data() { }
 
         public Data(TelegramChat user, string key, string value) {
             UserId = user.Id;
-            User = user;
             Key = key;
             Value = value;
         }

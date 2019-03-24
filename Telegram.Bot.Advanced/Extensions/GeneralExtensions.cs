@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Telegram.Bot.Advanced.Models;
 using Telegram.Bot.Types;
 
 namespace Telegram.Bot.Advanced.Extensions
@@ -20,17 +21,6 @@ namespace Telegram.Bot.Advanced.Extensions
             };
 
             return command;
-        }
-    }
-
-    public class MessageCommand {
-        public string Command { get; set; }
-        public string Target { get; set; }
-        public List<string> Parameters { get; set; } = new List<string>();
-        public string Text { get; set; }
-
-        public bool IsCommand() {
-            return Command != null; 
         }
     }
 }

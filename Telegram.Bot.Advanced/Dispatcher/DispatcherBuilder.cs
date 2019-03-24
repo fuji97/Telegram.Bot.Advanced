@@ -22,7 +22,7 @@ namespace Telegram.Bot.Advanced.Dispatcher {
         }
 
         public IDispatcher Build() {
-            return new Dispatcher<TContext,TController>(_botData);
+            return new Dispatcher<TContext,TController>(_botData, _logger);
         }
     }
 }

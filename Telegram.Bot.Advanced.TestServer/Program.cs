@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
+using Telegram.Bot.Advanced.TestServer.TelegramController;
 
 namespace Telegram.Bot.Advanced.TestServer {
     public class Program {
@@ -18,6 +19,6 @@ namespace Telegram.Bot.Advanced.TestServer {
                     logging.AddDebug();
                     logging.AddEventSourceLogger();
                 })
-                .UseStartup<Startup>();
+                .UseStartup<StartupWebhook>();
     }
 }

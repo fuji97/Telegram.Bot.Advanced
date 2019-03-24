@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Telegram.Bot.Advanced.Extensions {
+namespace Telegram.Bot.Advanced.Models {
     public class MessageCommand {
         public string Command { get; set; }
         public string Target { get; set; }

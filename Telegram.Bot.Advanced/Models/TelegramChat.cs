@@ -91,7 +91,6 @@ namespace Telegram.Bot.Advanced.Models
             if (user != null) return false;
             context.Add(this);
             return true;
-
         }
 
         public async Task<bool> AddAsync(TelegramContext context)
@@ -100,7 +99,7 @@ namespace Telegram.Bot.Advanced.Models
             if (user != null) return false;
             await context.AddAsync(this);
             return true;
-
+            
         }
 
         public static TelegramChat Get(TelegramContext context, long id) {

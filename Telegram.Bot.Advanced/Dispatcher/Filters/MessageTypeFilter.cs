@@ -1,10 +1,9 @@
-﻿using Telegram.Bot.Advanced.Extensions;
-using Telegram.Bot.Advanced.Holder;
+﻿using Telegram.Bot.Advanced.Holder;
 using Telegram.Bot.Advanced.Models;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
-namespace Telegram.Bot.Advanced.DispatcherFilters
+namespace Telegram.Bot.Advanced.Dispatcher.Filters
 {
     public class MessageTypeFilter : DispatcherFilterAttribute
     {

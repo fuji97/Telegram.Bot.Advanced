@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Telegram.Bot.Advanced.Controller;
 using Telegram.Bot.Advanced.DbContexts;
-using Telegram.Bot.Advanced.DispatcherFilters;
+using Telegram.Bot.Advanced.Dispatcher.Filters;
 using Telegram.Bot.Advanced.Extensions;
 using Telegram.Bot.Advanced.Holder;
 using Telegram.Bot.Advanced.Models;
@@ -25,66 +25,41 @@ namespace Telegram.Bot.Advanced.Dispatcher
         private readonly IEnumerable<MethodInfo> _methods;
         private ILogger _logger;
         private readonly ITelegramBotData _botData;
-        //private IServiceProvider provider;
-        //private IServiceCollection services;
-        //private IServiceScope scope;
 
-        public Dispatcher(ITelegramBotData botData) {
+        public Dispatcher(ITelegramBotData botData, ILogger<Dispatcher<TContext,TController>> logger = null) {
             _botData = botData;
-            _methods = typeof(TController).GetMethods(BindingFlags.Public | BindingFlags.Instance);
-                                 //.Where(m => m.GetCustomAttributes(typeof(DispatcherFilterAttribute), false).Length > 0);
-
-            //ILoggerFactory loggerFactory = new LoggerFactory();
-            //_logger = loggerFactory.CreateLogger<Dispatcher<TContext, TController>>();
+            _methods = typeof(TController).GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(m => !m.IsSpecialName);
+            _logger = logger;
         }
 
-        public void DispatchUpdate(Update update, IServiceProvider provider) {
-            if (provider != null)
-            {
-                using (var scope = provider.CreateScope()) {
-                    Dispatch(scope.ServiceProvider.GetRequiredService<TController>(), update);
-                }
-            }
-            else {
-                Dispatch(new TController(), update);
-            }
-            
-        }
-
-        public void SetServices(IServiceProvider provider) {
-            _logger = provider.GetService<ILogger<Dispatcher<TContext,TController>>>();
-        }
-
-        public async Task DispatchUpdateAsync(Update update, IServiceProvider provider)
-        {
-            if (provider != null)
-            {
-                using (var scope = provider.CreateScope())
-                {
-                    await DispatchAsync(scope.ServiceProvider.GetRequiredService<TController>(), update);
-                }
-            }
-            else
-            {
-                await DispatchAsync(new TController(), update);
-            }
-        }
-
-        public void RegisterController(IServiceCollection services) {
-            services.TryAddScoped<TController>();
-        }
-
-        private static void SetControllerData(TController controller, MessageCommand command, TContext context,
+        private static void SetControllerData(TController controller, Update update, MessageCommand command,
+            TContext context,
             TelegramChat chat, ITelegramBotData botData) {
+            controller.Update = update;
             controller.MessageCommand = command;
             controller.TelegramContext = context;
             controller.TelegramChat = chat;
             controller.BotData = botData;
         }
 
-        private void Dispatch(TController controller, Update update) {
+        public Type GetControllerType() {
+            return typeof(TController);
+        }
+
+        public Type GetContextType() {
+            return typeof(TContext);
+        }
+        
+        /*
+        #region Polling mode
+        
+        public void DispatchUpdate(Update update) {
+            PollingDispatch(new TController(), update);
+        }
+        
+        private void PollingDispatch(TController controller, Update update) {
             using (TContext context = new TContext()) {
-                Console.WriteLine($"Received update - ID: {update.Id}");
+                _logger?.LogInformation($"Received update - ID: {update.Id}");
                 TelegramChat chat = null;
                 if (update.Type == UpdateType.Message) {
                     var newChat = update.Message.Chat;
@@ -131,16 +106,12 @@ namespace Telegram.Bot.Advanced.Dispatcher
                         chat = new TelegramChat(update.Message.Chat);
                         context.Add(chat);
                     }
-
-                    Console.WriteLine(
-                        $"Chat privata - Informazioni sull'utente: [{chat.Id}] @{chat.Username} State: {chat.State} - Role: {chat.Role}");
                 }
 
                 MessageCommand command;
                 if (update.Type == UpdateType.Message) {
                     command = update.Message.GetCommand();
                     if (command.Target != null && command.Target != chat.Username) {
-                        Console.WriteLine($"Command's target is @{command.Target} - Ignoring command");
                         return;
                     }
                 }
@@ -154,11 +125,11 @@ namespace Telegram.Bot.Advanced.Dispatcher
                     context.SaveChanges();
                 }
                 catch (Exception e) {
-                    _logger.LogError(e.Message);
+                    _logger?.LogError(e.Message);
                 }
                 
-                _logger.LogDebug($"Command: {JsonConvert.SerializeObject(command, Formatting.Indented)}");
-                _logger.LogDebug($"Chat: {JsonConvert.SerializeObject(chat, Formatting.Indented)}");
+                _logger?.LogDebug($"Command: {JsonConvert.SerializeObject(command, Formatting.Indented)}");
+                _logger?.LogDebug($"Chat: {JsonConvert.SerializeObject(chat, Formatting.Indented)}");
 
                 bool executed = false;
 
@@ -167,6 +138,7 @@ namespace Telegram.Bot.Advanced.Dispatcher
                                                             .All(attr =>
                                                                 ((DispatcherFilterAttribute) attr).IsValid(update,
                                                                     chat, command, _botData))).ToArray()) {
+                    _logger?.LogInformation($"Calling method: {method.Name}()");
                     method.Invoke(controller, null);
                 }
 
@@ -174,20 +146,44 @@ namespace Telegram.Bot.Advanced.Dispatcher
                     context.SaveChanges();
                 }
                 catch (Exception e) {
-                    _logger.LogError(e.Message);
+                    _logger?.LogError(e.Message);
                 }
                 
                 if (!executed) {
-                    _logger.LogInformation("No valid method found to manage current request.");
+                    _logger?.LogInformation("No valid method found to manage current update.");
                 }
             }
+        }
+        
+        #endregion
+        */
+
+        #region Webhook mode
+        
+        public void SetServices(IServiceProvider provider) {
+            _logger = provider.GetService<ILogger<Dispatcher<TContext,TController>>>();
+        }
+
+        public async Task DispatchUpdateAsync(Update update, IServiceProvider provider = null) {
+            if (provider != null) {
+                using (var scope = provider.CreateScope()) {
+                    await DispatchAsync(scope.ServiceProvider.GetRequiredService<TController>(), update);
+                }
+            }
+            else {
+                await DispatchAsync(new TController(), update);
+            }
+        }
+
+        public void RegisterController(IServiceCollection services) {
+            services.TryAddScoped<TController>();
         }
 
         private async Task DispatchAsync(TController controller, Update update)
         {
             using (TContext context = new TContext())
             {
-                _logger.LogInformation($"Received update - ID: {update.Id}");
+                _logger?.LogInformation($"Received update - ID: {update.Id}");
                 TelegramChat chat = null;
                 if (update.Type == UpdateType.Message)
                 {
@@ -246,9 +242,6 @@ namespace Telegram.Bot.Advanced.Dispatcher
                         chat = new TelegramChat(update.Message.Chat);
                         await context.AddAsync(chat);
                     }
-
-                    _logger.LogInformation(
-                        $"Private chat - User's informations: [{chat.Id}] @{chat.Username} State: {chat.State} - Role: {chat.Role}");
                 }
 
                 MessageCommand command;
@@ -257,7 +250,7 @@ namespace Telegram.Bot.Advanced.Dispatcher
                     command = update.Message.GetCommand();
                     if (command.Target != null && command.Target != chat.Username)
                     {
-                        _logger.LogDebug($"Command's target is @{command.Target} - Ignoring command");
+                        _logger?.LogDebug($"Command's target is @{command.Target} - Ignoring command");
                         return;
                     }
                 }
@@ -265,7 +258,7 @@ namespace Telegram.Bot.Advanced.Dispatcher
                     command = new MessageCommand();
                 }
 
-                SetControllerData(controller, command, context, chat, _botData);
+                SetControllerData(controller, update, command, context, chat, _botData);
                 
                 try
                 {
@@ -273,25 +266,31 @@ namespace Telegram.Bot.Advanced.Dispatcher
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError(e.Message);
+                    _logger?.LogError(e.Message);
                 }
                 
-                _logger.LogDebug($"Command: {JsonConvert.SerializeObject(command, Formatting.Indented)}");
-                _logger.LogDebug($"Chat: {JsonConvert.SerializeObject(chat, Formatting.Indented)}");
+                _logger?.LogDebug($"Command: {JsonConvert.SerializeObject(command, Formatting.Indented)}");
+                _logger?.LogDebug($"Chat: {JsonConvert.SerializeObject(chat, Formatting.Indented)}");
 
                 bool executed = false;
-                foreach (var method in _methods.Where(m => m.GetCustomAttributes()
-                                                            .Where(att => att is DispatcherFilterAttribute)
-                                                            .All(attr =>
-                                                                ((DispatcherFilterAttribute)attr).IsValid(update,
-                                                                    chat, command, _botData)))
-                    .Where(m => 
-                        (AsyncStateMachineAttribute) m.GetCustomAttribute(typeof(AsyncStateMachineAttribute)) != null)
-                    .ToArray())
-                {
-                    _logger.LogTrace($"Calling method: {method.Name}");
+                
+                // Needs to generate the entire list before the cycle because changes to the user
+                // made by the first methods can influence the selections of the latter
+                var validMethods = _methods.Where(m => m.GetCustomAttributes()
+                    .Where(att => att is DispatcherFilterAttribute)
+                    .All(attr =>
+                        ((DispatcherFilterAttribute) attr).IsValid(update,
+                            chat, command, _botData))).ToList();
+                
+                foreach (var method in validMethods) {
+                    _logger?.LogInformation($"Calling method: {method.Name}");
                     executed = true;
-                    await (Task) method.Invoke(controller, null);
+                    if (method.GetCustomAttribute<AsyncStateMachineAttribute>() != null) {
+                        await (Task) method.Invoke(controller, null);
+                    }
+                    else {
+                        method.Invoke(controller, null);
+                    }
                 }
 
                 try
@@ -308,6 +307,8 @@ namespace Telegram.Bot.Advanced.Dispatcher
                 }
             }
         }
+
+        #endregion
 
         public void Dispose() {
             

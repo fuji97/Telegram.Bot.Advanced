@@ -1,20 +1,16 @@
-using System;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Advanced.Controller;
-using Telegram.Bot.Advanced.DispatcherFilters;
-using Telegram.Bot.Advanced.Models;
-using Telegram.Bot.Types;
+using Telegram.Bot.Advanced.Dispatcher.Filters;
 
-namespace Telegram.Bot.Advanced.TestServer {
-    public class TelegramTestController : TelegramController<TestTelegramContext> {
-        private readonly ILogger<TelegramTestController> _logger;
+namespace Telegram.Bot.Advanced.TestServer.TelegramController {
+    public class TelegramWebhookController : TelegramController<TestTelegramContext> {
+        private readonly ILogger<TelegramWebhookController> _logger;
         private readonly TestTelegramContext _context;
 
-        public TelegramTestController() {}
+        public TelegramWebhookController() {}
         
-        public TelegramTestController(ILogger<TelegramTestController> logger, TestTelegramContext context) {
+        public TelegramWebhookController(ILogger<TelegramWebhookController> logger, TestTelegramContext context) {
             _logger = logger;
             _context = context;
         }

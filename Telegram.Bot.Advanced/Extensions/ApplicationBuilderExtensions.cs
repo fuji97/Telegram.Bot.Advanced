@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Telegram.Bot.Advanced.Exceptions;
 using Telegram.Bot.Advanced.Holder;
 using Telegram.Bot.Advanced.Middlewares;
@@ -31,9 +33,15 @@ namespace Telegram.Bot.Advanced.Extensions {
 
             foreach (var bot in holder) {
                 bot.Bot.OnUpdate += (sender, e) => 
-                    bot.Dispatcher.DispatchUpdateAsync(e.Update, app.ApplicationServices);
+                    bot.Dispatcher.DispatchUpdateAsync(e.Update);
             }
             foreach (var bot in holder) {
+                bot.Bot.DeleteWebhookAsync().Wait();
+                app.Map(bot.BasePath + bot.Endpoint, 
+                    builder => builder.Run(async context => {
+                        context.Response.StatusCode = 200;
+                        await context.Response.WriteAsync("Ok");
+                    }));
                 bot.Bot.StartReceiving(Array.Empty<UpdateType>());
             }
             return app;

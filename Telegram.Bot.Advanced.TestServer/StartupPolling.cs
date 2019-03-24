@@ -11,11 +11,11 @@ using Telegram.Bot.Advanced.Holder;
 using Telegram.Bot.Advanced.TestServer.TelegramController;
 
 namespace Telegram.Bot.Advanced.TestServer {
-    public class Startup {
+    public class StartupPolling {
         private readonly IConfiguration _configuration;
         private readonly ILogger<Dispatcher<TestTelegramContext, TelegramPollingController>> _pollingLogger;
 
-        public Startup(IConfiguration configuration, ILogger<Dispatcher<TestTelegramContext, TelegramPollingController>> pollingLogger) {
+        public StartupPolling(IConfiguration configuration, ILogger<Dispatcher<TestTelegramContext, TelegramPollingController>> pollingLogger) {
             _configuration = configuration;
             _pollingLogger = pollingLogger;
         }
@@ -27,17 +27,11 @@ namespace Telegram.Bot.Advanced.TestServer {
             services.AddTelegramHolder(
                 new TelegramBotDataBuilder()
                     .CreateTelegramBotClient(_configuration["TELEGRAM_BOT_KEY"])
-                    .UseDispatcherBuilder(new DispatcherBuilder<TestTelegramContext, TelegramPollingController>().SetLogger(_pollingLogger))
+                    .UseDispatcherBuilder(new DispatcherBuilder<TestTelegramContext, TelegramPollingController>()
+                        .SetLogger(_pollingLogger))
                     .SetBasePath(_configuration["Telegram:Webhook"])
                     .Build()
                  );
-            
-            /*
-            services.AddTelegramHolder(new TelegramBotData(new TelegramBotClient(_configuration["TELEGRAM_BOT_KEY"]),
-                new DispatcherBuilder<TestTelegramContext, TelegramTestController>(),
-                _configuration["TELEGRAM_BOT_KEY"],
-                _configuration["Telegram:Webhook"]));
-            */
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
@@ -48,7 +42,6 @@ namespace Telegram.Bot.Advanced.TestServer {
                 app.UseDeveloperExceptionPage();
             }
 
-            //app.UseTelegramRouting();
             app.UseTelegramPolling();
             app.UseMvc();
         }

@@ -1,9 +1,8 @@
-﻿using Telegram.Bot.Advanced.Extensions;
-using Telegram.Bot.Advanced.Holder;
+﻿using Telegram.Bot.Advanced.Holder;
 using Telegram.Bot.Advanced.Models;
 using Telegram.Bot.Types;
 
-namespace Telegram.Bot.Advanced.DispatcherFilters
+namespace Telegram.Bot.Advanced.Dispatcher.Filters
 {
     public class NoCommandFilter : DispatcherFilterAttribute
     {

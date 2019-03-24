@@ -5,8 +5,9 @@ using Telegram.Bot.Types;
 
 namespace Telegram.Bot.Advanced.Dispatcher {
     public interface IDispatcher {
-        void DispatchUpdate(Update update, IServiceProvider provider);
-        Task DispatchUpdateAsync(Update update, IServiceProvider provider);
+        Type GetControllerType();
+        Type GetContextType();
+        Task DispatchUpdateAsync(Update update, IServiceProvider provider = null);
         void RegisterController(IServiceCollection services);
         void SetServices(IServiceProvider provider);
     }
