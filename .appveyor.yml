@@ -2,10 +2,15 @@ version: 1.0.{build}-alpha
 image: Visual Studio 2017
 configuration: Release
 
+branches:
+    only:
+      - master
+
 before_build:
-- nuget restore Telegram.Bot.Extensions.Filters.sln
+  - nuget restore Telegram.Bot.Advanced.sln
 
 build:
+  project: Telegram.Bot.Advanced.sln
   publish_nuget: true
   publish_nuget_symbols: true
   verbosity: normal
@@ -18,5 +23,3 @@ deploy:
   api_key:
     secure: NgKnkZVr9GZkBrpmRvQpAxbH9AJa1o2EwD+iBBjw/FjJjf8gq+QEo/QWkJ5xJFxj
   skip_symbols: false
-  symbol_server:           # remove to push symbols to SymbolSource.org
-  artifact: /.*\.nupkg/
