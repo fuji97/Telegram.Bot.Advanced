@@ -8,7 +8,7 @@
     <license type="file">license.txt</license>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <projectUrl>https://github.com/fuji97/Telegram.Bot.Advanced</projectUrl>
-    <iconUrl>https://github.com/fuji97/Telegram.Bot.Advanced/raw/master/icon.png</iconUrl>
+    <iconUrl>https://raw.githubusercontent.com/fuji97/Telegram.Bot.Advanced/master/icon.png</iconUrl>
     <description>$description$</description>
     <copyright>$copyright$</copyright>
     <tags>Telegram Bot Api Telegram.Bot</tags>
