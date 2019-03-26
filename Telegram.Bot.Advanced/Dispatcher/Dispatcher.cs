@@ -11,7 +11,6 @@ using Newtonsoft.Json;
 using Telegram.Bot.Advanced.Controller;
 using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.Dispatcher.Filters;
-using Telegram.Bot.Advanced.Extensions;
 using Telegram.Bot.Advanced.Holder;
 using Telegram.Bot.Advanced.Models;
 using Telegram.Bot.Types;
@@ -247,7 +246,7 @@ namespace Telegram.Bot.Advanced.Dispatcher
                 MessageCommand command;
                 if (update.Type == UpdateType.Message)
                 {
-                    command = update.Message.GetCommand();
+                    command = new MessageCommand(update.Message);
                     if (command.Target != null && command.Target != chat.Username)
                     {
                         _logger?.LogDebug($"Command's target is @{command.Target} - Ignoring command");
@@ -260,14 +259,7 @@ namespace Telegram.Bot.Advanced.Dispatcher
 
                 SetControllerData(controller, update, command, context, chat, _botData);
                 
-                try
-                {
-                    context.SaveChanges();
-                }
-                catch (Exception e)
-                {
-                    _logger?.LogError(e.Message);
-                }
+                context.SaveChanges();
                 
                 _logger?.LogDebug($"Command: {JsonConvert.SerializeObject(command, Formatting.Indented)}");
                 _logger?.LogDebug($"Chat: {JsonConvert.SerializeObject(chat, Formatting.Indented)}");
@@ -293,14 +285,7 @@ namespace Telegram.Bot.Advanced.Dispatcher
                     }
                 }
 
-                try
-                {
-                    context.SaveChanges();
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError(e.Message);
-                }
+                context.SaveChanges();
 
                 if (!executed) {
                     _logger.LogInformation("No valid method found to manage current request.");

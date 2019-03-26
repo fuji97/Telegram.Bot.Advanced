@@ -19,6 +19,6 @@ namespace Telegram.Bot.Advanced.TestServer {
                     logging.AddDebug();
                     logging.AddEventSourceLogger();
                 })
-                .UseStartup<StartupWebhook>();
+                .UseStartup<StartupPolling>();
     }
 }

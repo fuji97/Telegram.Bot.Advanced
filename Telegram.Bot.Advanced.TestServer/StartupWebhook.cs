@@ -7,8 +7,9 @@ using Microsoft.Extensions.Logging;
 using Telegram.Bot.Advanced.Dispatcher;
 using Telegram.Bot.Advanced.Extensions;
 using Telegram.Bot.Advanced.Holder;
+using Telegram.Bot.Advanced.TestServer.TelegramController;
 
-namespace Telegram.Bot.Advanced.TestServer.TelegramController {
+namespace Telegram.Bot.Advanced.TestServer {
     public class StartupWebhook {
         private readonly IConfiguration _configuration;
         private readonly ILogger<Dispatcher<TestTelegramContext, TelegramPollingController>> _pollingLogger;
