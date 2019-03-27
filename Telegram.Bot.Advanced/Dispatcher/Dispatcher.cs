@@ -152,8 +152,8 @@ namespace Telegram.Bot.Advanced.Dispatcher
                 
                 context.SaveChanges();
                 
-                _logger?.LogDebug($"Command: {JsonConvert.SerializeObject(command, Formatting.Indented)}");
-                _logger?.LogDebug($"Chat: {JsonConvert.SerializeObject(chat, Formatting.Indented)}");
+                _logger?.LogTrace($"Command: {JsonConvert.SerializeObject(command, Formatting.Indented)}");
+                _logger?.LogTrace($"Chat: {JsonConvert.SerializeObject(chat, Formatting.Indented)}");
 
                 bool executed = false;
                 
