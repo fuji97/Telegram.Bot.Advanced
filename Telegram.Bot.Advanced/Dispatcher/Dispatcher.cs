@@ -174,12 +174,14 @@ namespace Telegram.Bot.Advanced.Dispatcher
                     else {
                         method.Invoke(controller, null);
                     }
+                    _logger?.LogTrace("Method finished");
                 }
 
                 if (!executed) {
                     _logger.LogInformation("No valid method found to manage current request.");
                 }
             }
+            _logger?.LogTrace("End of dispatching");
         }
 
         public void Dispose() {
