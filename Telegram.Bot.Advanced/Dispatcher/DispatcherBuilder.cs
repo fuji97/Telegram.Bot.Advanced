@@ -5,8 +5,8 @@ using Telegram.Bot.Advanced.Holder;
 
 namespace Telegram.Bot.Advanced.Dispatcher {
     public class DispatcherBuilder<TContext, TController> : IDispatcherBuilder
-        where TContext : TelegramContext, new()
-        where TController : class, ITelegramController<TContext>, new() {
+        where TContext : TelegramContext
+        where TController : class, ITelegramController<TContext> {
 
         private ITelegramBotData _botData;
         private ILogger<Dispatcher<TContext, TController>> _logger;

@@ -11,7 +11,7 @@ using Telegram.Bot.Types.Enums;
 
 namespace Telegram.Bot.Advanced.Extensions {
     public static class ApplicationBuilderExtensions {
-        public static IApplicationBuilder UseTelegramRouting(this IApplicationBuilder app) {
+        public static IApplicationBuilder UseTelegramRouting(this IApplicationBuilder app, TelegramRoutingOptions options = null) {
             var holder = app.ApplicationServices.GetService<ITelegramHolder>();
             if (holder == null) {
                 throw new TelegramHolderNotInjectedException();
@@ -20,6 +20,9 @@ namespace Telegram.Bot.Advanced.Extensions {
             foreach (var bot in holder) {
                 app.Map(bot.BasePath + bot.Endpoint, 
                     builder => builder.UseMiddleware<TelegramRouting>(bot.Endpoint));
+                if (options?.WebhookBaseUrl != null) {
+                    bot.Bot.SetWebhookAsync(options.WebhookBaseUrl + bot.BasePath + bot.Endpoint).Start();
+                }
                 bot.Dispatcher.SetServices(app.ApplicationServices);
             }
             return app;

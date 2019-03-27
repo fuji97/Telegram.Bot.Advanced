@@ -12,11 +12,9 @@ using Telegram.Bot.Advanced.TestServer.TelegramController;
 namespace Telegram.Bot.Advanced.TestServer {
     public class StartupWebhook {
         private readonly IConfiguration _configuration;
-        private readonly ILogger<Dispatcher<TestTelegramContext, TelegramPollingController>> _pollingLogger;
 
-        public StartupWebhook(IConfiguration configuration, ILogger<Dispatcher<TestTelegramContext, TelegramPollingController>> pollingLogger) {
+        public StartupWebhook(IConfiguration configuration) {
             _configuration = configuration;
-            _pollingLogger = pollingLogger;
         }
         
         public void ConfigureServices(IServiceCollection services) {
@@ -40,7 +38,9 @@ namespace Telegram.Bot.Advanced.TestServer {
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseTelegramRouting();
+            app.UseTelegramRouting(new TelegramRoutingOptions() {
+                WebhookBaseUrl = _configuration["BaseUrl"]
+            });
             app.UseMvc();
         }
     }

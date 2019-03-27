@@ -21,7 +21,7 @@ namespace Telegram.Bot.Advanced.Dispatcher
 {
     public class Dispatcher<TContext, TController> : IDisposable, IDispatcher
         where TContext : TelegramContext 
-        where TController : class, ITelegramController<TContext>, new() {
+        where TController : class, ITelegramController<TContext> {
         private readonly IEnumerable<MethodInfo> _methods;
         private ILogger _logger;
         private readonly ITelegramBotData _botData;
