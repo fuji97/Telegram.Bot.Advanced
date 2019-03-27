@@ -13,6 +13,10 @@ namespace Telegram.Bot.Advanced.DbContexts
         
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             modelBuilder.Entity<Data>().HasKey(t => new { t.UserId, t.Key });
+            modelBuilder.Entity<TelegramChat>()
+                .HasMany(c => c.Data)
+                .WithOne(c => c.Chat)
+                .HasForeignKey(c => c.UserId);
         }
 
         // Entities

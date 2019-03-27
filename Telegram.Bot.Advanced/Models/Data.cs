@@ -4,11 +4,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Telegram.Bot.Advanced.Models
 {
     public class Data {
-        [Key]
         public long UserId { get; set; }
-        [Key]
         public string Key { get; set; }
         public string Value { get; set; }
+        public TelegramChat Chat { get; set; }
 
         public Data() { }
 
