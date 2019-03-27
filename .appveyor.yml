@@ -26,7 +26,8 @@ deploy:
     on:
       branch: master
   - provider: NuGet
-    server: https://ci.appveyor.com/nuget/fuji97-o6dbs344hoht
+    server: https://ci.appveyor.com/nuget/fuji97-o6dbs344hoht/api/v2/package
+    symbol_server: https://ci.appveyor.com/nuget/fuji97-o6dbs344hoht/api/v2/package
     api_key:
       secure: 85RmFvsGyCrOxDNTVLEEHP9z43fXZ8OV7XEinYCHbGA=
     skip_symbols: false
@@ -44,8 +45,8 @@ for:
 
   -
     branches:
-      except:
-        - master
+      only:
+        - develop
 
     configuration: Debug
     dotnet_csproj:
