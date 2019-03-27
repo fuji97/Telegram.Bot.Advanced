@@ -5,7 +5,7 @@ namespace Telegram.Bot.Advanced.DbContexts
 {
     public abstract class TelegramContext : DbContext {
         
-        protected TelegramContext(DbContextOptions<TelegramContext> options)
+        protected TelegramContext(DbContextOptions options)
             : base(options) {
         }
         

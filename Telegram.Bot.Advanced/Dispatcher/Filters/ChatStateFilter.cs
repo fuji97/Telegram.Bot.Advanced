@@ -13,7 +13,7 @@ namespace Telegram.Bot.Advanced.Dispatcher.Filters
         }
 
         public override bool IsValid(Update update, TelegramChat user, MessageCommand command, ITelegramBotData botData) {
-            return _state.Contains(user.State);
+            return user != null && _state.Contains(user.State);
         }
     }
 }

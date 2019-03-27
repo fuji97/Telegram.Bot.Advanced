@@ -32,8 +32,9 @@ namespace Telegram.Bot.Advanced.Extensions {
             }
 
             foreach (var bot in holder) {
+                bot.Dispatcher.SetServices(app.ApplicationServices);
                 bot.Bot.OnUpdate += (sender, e) => 
-                    bot.Dispatcher.DispatchUpdateAsync(e.Update);
+                    bot.Dispatcher.DispatchUpdateAsync(e.Update, app.ApplicationServices);
             }
             foreach (var bot in holder) {
                 bot.Bot.DeleteWebhookAsync().Wait();
