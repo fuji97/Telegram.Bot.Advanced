@@ -74,7 +74,7 @@ namespace Telegram.Bot.Advanced.Dispatcher
         private async Task DispatchAsync(IServiceScope scope, Update update) {
             TController controller = scope.ServiceProvider.GetRequiredService<TController>();
             TContext context = scope.ServiceProvider.GetRequiredService<TContext>();
-            _logger?.LogInformation($"Received update - ID: {update.Id}");
+            _logger.LogInformation($"Received update - ID: {update.Id}");
             TelegramChat chat = null;
             if (update.Type == UpdateType.Message)
             {
@@ -140,7 +140,7 @@ namespace Telegram.Bot.Advanced.Dispatcher
                     command = new MessageCommand(update.Message);
                     if (command.Target != null && _botData.Username != null && command.Target != _botData.Username)
                     {
-                        _logger?.LogDebug($"Command's target is @{command.Target} - Ignoring command");
+                        _logger.LogDebug($"Command's target is @{command.Target} - Ignoring command");
                         return;
                     }
                 }
@@ -152,8 +152,8 @@ namespace Telegram.Bot.Advanced.Dispatcher
                 
                 context.SaveChanges();
                 
-                _logger?.LogTrace($"Command: {JsonConvert.SerializeObject(command, Formatting.Indented)}");
-                _logger?.LogTrace($"Chat: {JsonConvert.SerializeObject(chat, Formatting.Indented)}");
+                _logger.LogTrace($"Command: {JsonConvert.SerializeObject(command, Formatting.Indented)}");
+                _logger.LogTrace($"Chat: {JsonConvert.SerializeObject(chat, Formatting.Indented)}");
 
                 bool executed = false;
                 
@@ -166,7 +166,7 @@ namespace Telegram.Bot.Advanced.Dispatcher
                             chat, command, _botData))).ToList();
                 
                 foreach (var method in validMethods) {
-                    _logger?.LogInformation($"Calling method: {method.Name}");
+                    _logger.LogInformation($"Calling method: {method.Name}");
                     executed = true;
                     if (method.GetCustomAttribute<AsyncStateMachineAttribute>() != null) {
                         await (Task) method.Invoke(controller, null);
@@ -174,14 +174,14 @@ namespace Telegram.Bot.Advanced.Dispatcher
                     else {
                         method.Invoke(controller, null);
                     }
-                    _logger?.LogTrace("Method finished");
+                    _logger.LogTrace("Method finished");
                 }
 
                 if (!executed) {
                     _logger.LogInformation("No valid method found to manage current request.");
                 }
             }
-            _logger?.LogTrace("End of dispatching");
+            _logger.LogTrace("End of dispatching");
         }
 
         public void Dispose() {
