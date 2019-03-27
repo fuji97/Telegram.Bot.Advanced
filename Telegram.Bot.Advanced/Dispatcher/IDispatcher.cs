@@ -7,7 +7,7 @@ namespace Telegram.Bot.Advanced.Dispatcher {
     public interface IDispatcher {
         Type GetControllerType();
         Type GetContextType();
-        Task DispatchUpdateAsync(Update update, IServiceProvider provider = null);
+        Task DispatchUpdateAsync(Update update, IServiceProvider provider);
         void RegisterController(IServiceCollection services);
         void SetServices(IServiceProvider provider);
     }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -19,11 +20,12 @@ using Telegram.Bot.Types.Enums;
 namespace Telegram.Bot.Advanced.Dispatcher
 {
     public class Dispatcher<TContext, TController> : IDisposable, IDispatcher
-        where TContext : TelegramContext, new() 
+        where TContext : TelegramContext 
         where TController : class, ITelegramController<TContext>, new() {
         private readonly IEnumerable<MethodInfo> _methods;
         private ILogger _logger;
         private readonly ITelegramBotData _botData;
+        private int _lastUpdateId = -1;
 
         public Dispatcher(ITelegramBotData botData, ILogger<Dispatcher<TContext,TController>> logger = null) {
             _botData = botData;
@@ -49,128 +51,19 @@ namespace Telegram.Bot.Advanced.Dispatcher
             return typeof(TContext);
         }
         
-        /*
-        #region Polling mode
-        
-        public void DispatchUpdate(Update update) {
-            PollingDispatch(new TController(), update);
-        }
-        
-        private void PollingDispatch(TController controller, Update update) {
-            using (TContext context = new TContext()) {
-                _logger?.LogInformation($"Received update - ID: {update.Id}");
-                TelegramChat chat = null;
-                if (update.Type == UpdateType.Message) {
-                    var newChat = update.Message.Chat;
-                    chat = TelegramChat.Get(context, newChat.Id);
-
-                    if (chat != null) {
-                        if (newChat.Username != null && chat.Username == newChat.Username) {
-                            chat.Username = newChat.Username;
-                        }
-
-                        if (newChat.Title != null && chat.Title == newChat.Title) {
-                            chat.Title = newChat.Title;
-                        }
-
-                        if (newChat.Description != null && chat.Description == newChat.Description) {
-                            chat.Description = newChat.Description;
-                        }
-
-                        if (newChat.InviteLink != null && chat.InviteLink == newChat.InviteLink) {
-                            chat.InviteLink = newChat.InviteLink;
-                        }
-
-                        if (newChat.LastName != null && chat.LastName == newChat.LastName) {
-                            chat.LastName = newChat.LastName;
-                        }
-
-                        if (newChat.StickerSetName != null && chat.StickerSetName == newChat.StickerSetName) {
-                            chat.StickerSetName = newChat.StickerSetName;
-                        }
-
-                        if (newChat.FirstName != null && chat.FirstName == newChat.FirstName) {
-                            chat.FirstName = newChat.FirstName;
-                        }
-
-                        if (newChat.CanSetStickerSet != null && chat.CanSetStickerSet == newChat.CanSetStickerSet) {
-                            chat.CanSetStickerSet = newChat.CanSetStickerSet;
-                        }
-
-                        if (chat.AllMembersAreAdministrators == newChat.AllMembersAreAdministrators) {
-                            chat.AllMembersAreAdministrators = newChat.AllMembersAreAdministrators;
-                        }
-                    }
-                    else {
-                        chat = new TelegramChat(update.Message.Chat);
-                        context.Add(chat);
-                    }
-                }
-
-                MessageCommand command;
-                if (update.Type == UpdateType.Message) {
-                    command = update.Message.GetCommand();
-                    if (command.Target != null && command.Target != chat.Username) {
-                        return;
-                    }
-                }
-                else {
-                    command = new MessageCommand();
-                }
-
-                SetControllerData(controller, command, context, chat, _botData);
-                
-                try {
-                    context.SaveChanges();
-                }
-                catch (Exception e) {
-                    _logger?.LogError(e.Message);
-                }
-                
-                _logger?.LogDebug($"Command: {JsonConvert.SerializeObject(command, Formatting.Indented)}");
-                _logger?.LogDebug($"Chat: {JsonConvert.SerializeObject(chat, Formatting.Indented)}");
-
-                bool executed = false;
-
-                foreach (var method in _methods.Where(m => m.GetCustomAttributes()
-                                                            .Where(att => att is DispatcherFilterAttribute)
-                                                            .All(attr =>
-                                                                ((DispatcherFilterAttribute) attr).IsValid(update,
-                                                                    chat, command, _botData))).ToArray()) {
-                    _logger?.LogInformation($"Calling method: {method.Name}()");
-                    method.Invoke(controller, null);
-                }
-
-                try {
-                    context.SaveChanges();
-                }
-                catch (Exception e) {
-                    _logger?.LogError(e.Message);
-                }
-                
-                if (!executed) {
-                    _logger?.LogInformation("No valid method found to manage current update.");
-                }
-            }
-        }
-        
-        #endregion
-        */
-
-        #region Webhook mode
-        
         public void SetServices(IServiceProvider provider) {
             _logger = provider.GetService<ILogger<Dispatcher<TContext,TController>>>();
         }
 
-        public async Task DispatchUpdateAsync(Update update, IServiceProvider provider = null) {
-            if (provider != null) {
+        public async Task DispatchUpdateAsync(Update update, IServiceProvider provider) {
+            if (_lastUpdateId != update.Id) {
+                _lastUpdateId = update.Id;
                 using (var scope = provider.CreateScope()) {
-                    await DispatchAsync(scope.ServiceProvider.GetRequiredService<TController>(), update);
+                    await DispatchAsync(scope, update);
                 }
             }
             else {
-                await DispatchAsync(new TController(), update);
+                _logger.LogWarning("Duplicate update received - skipping");
             }
         }
 
@@ -178,69 +71,67 @@ namespace Telegram.Bot.Advanced.Dispatcher
             services.TryAddScoped<TController>();
         }
 
-        private async Task DispatchAsync(TController controller, Update update)
-        {
-            using (TContext context = new TContext())
+        private async Task DispatchAsync(IServiceScope scope, Update update) {
+            TController controller = scope.ServiceProvider.GetRequiredService<TController>();
+            TContext context = scope.ServiceProvider.GetRequiredService<TContext>();
+            _logger?.LogInformation($"Received update - ID: {update.Id}");
+            TelegramChat chat = null;
+            if (update.Type == UpdateType.Message)
             {
-                _logger?.LogInformation($"Received update - ID: {update.Id}");
-                TelegramChat chat = null;
-                if (update.Type == UpdateType.Message)
+                var newChat = update.Message.Chat;
+                chat = await TelegramChat.GetAsync(context, newChat.Id);
+
+                if (chat != null)
                 {
-                    var newChat = update.Message.Chat;
-                    chat = await TelegramChat.GetAsync(context, newChat.Id);
-
-                    if (chat != null)
+                    if (newChat.Username != null && chat.Username == newChat.Username)
                     {
-                        if (newChat.Username != null && chat.Username == newChat.Username)
-                        {
-                            chat.Username = newChat.Username;
-                        }
-
-                        if (newChat.Title != null && chat.Title == newChat.Title)
-                        {
-                            chat.Title = newChat.Title;
-                        }
-
-                        if (newChat.Description != null && chat.Description == newChat.Description)
-                        {
-                            chat.Description = newChat.Description;
-                        }
-
-                        if (newChat.InviteLink != null && chat.InviteLink == newChat.InviteLink)
-                        {
-                            chat.InviteLink = newChat.InviteLink;
-                        }
-
-                        if (newChat.LastName != null && chat.LastName == newChat.LastName)
-                        {
-                            chat.LastName = newChat.LastName;
-                        }
-
-                        if (newChat.StickerSetName != null && chat.StickerSetName == newChat.StickerSetName)
-                        {
-                            chat.StickerSetName = newChat.StickerSetName;
-                        }
-
-                        if (newChat.FirstName != null && chat.FirstName == newChat.FirstName)
-                        {
-                            chat.FirstName = newChat.FirstName;
-                        }
-
-                        if (newChat.CanSetStickerSet != null && chat.CanSetStickerSet == newChat.CanSetStickerSet)
-                        {
-                            chat.CanSetStickerSet = newChat.CanSetStickerSet;
-                        }
-
-                        if (chat.AllMembersAreAdministrators == newChat.AllMembersAreAdministrators)
-                        {
-                            chat.AllMembersAreAdministrators = newChat.AllMembersAreAdministrators;
-                        }
+                        chat.Username = newChat.Username;
                     }
-                    else
+
+                    if (newChat.Title != null && chat.Title == newChat.Title)
                     {
-                        chat = new TelegramChat(update.Message.Chat);
-                        await context.AddAsync(chat);
+                        chat.Title = newChat.Title;
                     }
+
+                    if (newChat.Description != null && chat.Description == newChat.Description)
+                    {
+                        chat.Description = newChat.Description;
+                    }
+
+                    if (newChat.InviteLink != null && chat.InviteLink == newChat.InviteLink)
+                    {
+                        chat.InviteLink = newChat.InviteLink;
+                    }
+
+                    if (newChat.LastName != null && chat.LastName == newChat.LastName)
+                    {
+                        chat.LastName = newChat.LastName;
+                    }
+
+                    if (newChat.StickerSetName != null && chat.StickerSetName == newChat.StickerSetName)
+                    {
+                        chat.StickerSetName = newChat.StickerSetName;
+                    }
+
+                    if (newChat.FirstName != null && chat.FirstName == newChat.FirstName)
+                    {
+                        chat.FirstName = newChat.FirstName;
+                    }
+
+                    if (newChat.CanSetStickerSet != null && chat.CanSetStickerSet == newChat.CanSetStickerSet)
+                    {
+                        chat.CanSetStickerSet = newChat.CanSetStickerSet;
+                    }
+
+                    if (chat.AllMembersAreAdministrators == newChat.AllMembersAreAdministrators)
+                    {
+                        chat.AllMembersAreAdministrators = newChat.AllMembersAreAdministrators;
+                    }
+                }
+                else
+                {
+                    chat = new TelegramChat(update.Message.Chat);
+                    await context.AddAsync(chat);
                 }
 
                 MessageCommand command;
@@ -285,15 +176,11 @@ namespace Telegram.Bot.Advanced.Dispatcher
                     }
                 }
 
-                context.SaveChanges();
-
                 if (!executed) {
                     _logger.LogInformation("No valid method found to manage current request.");
                 }
             }
         }
-
-        #endregion
 
         public void Dispose() {
             
