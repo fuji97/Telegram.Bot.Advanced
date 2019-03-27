@@ -24,6 +24,7 @@ namespace Telegram.Bot.Advanced.Extensions {
                     bot.Bot.SetWebhookAsync(options.WebhookBaseUrl + bot.BasePath + bot.Endpoint).Start();
                 }
                 bot.Dispatcher.SetServices(app.ApplicationServices);
+                bot.Username = (bot.Bot.GetMeAsync().Result).Username;
             }
             return app;
         }
@@ -46,6 +47,7 @@ namespace Telegram.Bot.Advanced.Extensions {
                         context.Response.StatusCode = 200;
                         await context.Response.WriteAsync("Ok");
                     }));
+                bot.Username = (bot.Bot.GetMeAsync().Result).Username;
                 bot.Bot.StartReceiving(Array.Empty<UpdateType>());
             }
             return app;

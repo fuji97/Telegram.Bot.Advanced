@@ -138,7 +138,7 @@ namespace Telegram.Bot.Advanced.Dispatcher
                 if (update.Type == UpdateType.Message)
                 {
                     command = new MessageCommand(update.Message);
-                    if (command.Target != null && command.Target != chat.Username)
+                    if (command.Target != null && _botData.Username != null && command.Target != _botData.Username)
                     {
                         _logger?.LogDebug($"Command's target is @{command.Target} - Ignoring command");
                         return;

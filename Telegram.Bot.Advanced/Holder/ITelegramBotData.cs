@@ -6,5 +6,6 @@ namespace Telegram.Bot.Advanced.Holder {
         ITelegramBotClient Bot { get; }
         IDispatcher Dispatcher { get; }
         string BasePath { get; }
+        string Username { get; set; }
     }
 }
