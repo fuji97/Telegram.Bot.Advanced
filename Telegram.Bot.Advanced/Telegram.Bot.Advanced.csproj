@@ -5,9 +5,9 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Fuji97</Authors>
     <Company>Sidereal Works</Company>
-    <Version>1.0.5.1</Version>
-    <AssemblyVersion>1.0.5.1</AssemblyVersion>
-    <FileVersion>1.0.5.1</FileVersion>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <FileVersion>1.0.0</FileVersion>
     <Description>An extension for Telegram.Bot to support dispatching based of filters and Dependency Injection</Description>
     <Copyright>Copyright © Federico Rapetti</Copyright>
     <PackageProjectUrl>https://github.com/fuji97/Telegram.Bot.Advanced</PackageProjectUrl>
