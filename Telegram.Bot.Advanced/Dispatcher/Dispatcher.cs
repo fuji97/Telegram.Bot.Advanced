@@ -23,6 +23,7 @@ namespace Telegram.Bot.Advanced.Dispatcher
         where TContext : TelegramContext 
         where TController : class, ITelegramController<TContext> {
         private readonly IEnumerable<MethodInfo> _methods;
+        private readonly MethodInfo _noMethodsMethod;
         private ILogger _logger;
         private readonly ITelegramBotData _botData;
         private int _lastUpdateId = -1;
@@ -30,6 +31,7 @@ namespace Telegram.Bot.Advanced.Dispatcher
         public Dispatcher(ITelegramBotData botData, ILogger<Dispatcher<TContext,TController>> logger = null) {
             _botData = botData;
             _methods = typeof(TController).GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(m => !m.IsSpecialName);
+            _noMethodsMethod = _methods.FirstOrDefault(m => m.GetCustomAttribute<NoMethodFilter>() != null);
             _logger = logger;
         }
 
@@ -154,30 +156,33 @@ namespace Telegram.Bot.Advanced.Dispatcher
                 
                 _logger.LogTrace($"Command: {JsonConvert.SerializeObject(command, Formatting.Indented)}");
                 _logger.LogTrace($"Chat: {JsonConvert.SerializeObject(chat, Formatting.Indented)}");
-
-                bool executed = false;
                 
-                // Needs to generate the entire list before the cycle because changes to the user
-                // made by the first methods can influence the selections of the latter
-                var validMethods = _methods.Where(m => m.GetCustomAttributes()
+                var firstMethod = _methods.FirstOrDefault(m => ((MemberInfo) m).GetCustomAttributes()
                     .Where(att => att is DispatcherFilterAttribute)
                     .All(attr =>
                         ((DispatcherFilterAttribute) attr).IsValid(update,
-                            chat, command, _botData))).ToList();
+                            chat, command, _botData)));
                 
-                foreach (var method in validMethods) {
-                    _logger.LogInformation($"Calling method: {method.Name}");
-                    executed = true;
-                    if (method.GetCustomAttribute<AsyncStateMachineAttribute>() != null) {
-                        await (Task) method.Invoke(controller, null);
+                if (firstMethod != null) {
+                    
+                    if (firstMethod.GetCustomAttribute<AsyncStateMachineAttribute>() != null) {
+                        _logger.LogInformation($"Calling async method: {firstMethod.Name}");
+                        await (Task) firstMethod.Invoke(controller, null);
                     }
                     else {
-                        method.Invoke(controller, null);
+                        _logger.LogInformation($"Calling sync method: {firstMethod.Name}");
+                        firstMethod.Invoke(controller, null);
                     }
-                    _logger.LogTrace("Method finished");
-                }
-
-                if (!executed) {
+                } else if (_noMethodsMethod != null) {
+                    if (_noMethodsMethod.GetCustomAttribute<AsyncStateMachineAttribute>() != null) {
+                        _logger.LogInformation("No valid method found to manage current request. Calling the async NoMethod: " + _noMethodsMethod.Name);
+                        await (Task) _noMethodsMethod.Invoke(controller, null);
+                    }
+                    else {
+                        _logger.LogInformation("No valid method found to manage current request. Calling the sync NoMethod: " + _noMethodsMethod.Name);
+                        _noMethodsMethod.Invoke(controller, null);
+                    }
+                } else {
                     _logger.LogInformation("No valid method found to manage current request.");
                 }
             }
