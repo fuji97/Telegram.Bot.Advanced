@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Newtonsoft.Json;
 
 namespace Telegram.Bot.Advanced.Models
 {
@@ -7,6 +8,7 @@ namespace Telegram.Bot.Advanced.Models
         public long UserId { get; set; }
         public string Key { get; set; }
         public string Value { get; set; }
+        [JsonIgnore]
         public TelegramChat Chat { get; set; }
 
         public Data() { }
