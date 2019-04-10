@@ -19,6 +19,11 @@ using Telegram.Bot.Types.Enums;
 
 namespace Telegram.Bot.Advanced.Dispatcher
 {
+    /// <summary>
+    /// The dispatcher class that receive the Update, create and set the controller and call the correct method
+    /// </summary>
+    /// <typeparam name="TContext">Context used by the application</typeparam>
+    /// <typeparam name="TController">Controller to use as source of methods</typeparam>
     public class Dispatcher<TContext, TController> : IDisposable, IDispatcher
         where TContext : TelegramContext 
         where TController : class, ITelegramController<TContext> {

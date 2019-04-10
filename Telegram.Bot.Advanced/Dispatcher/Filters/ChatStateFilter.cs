@@ -5,6 +5,9 @@ using Telegram.Bot.Types;
 
 namespace Telegram.Bot.Advanced.Dispatcher.Filters
 {
+    /// <summary>
+    /// The method is eligible if the state of the chat matches with one of the passed states
+    /// </summary>
     public class ChatStateFilter : DispatcherFilterAttribute {
         private readonly int[] _state;
 
@@ -12,6 +15,7 @@ namespace Telegram.Bot.Advanced.Dispatcher.Filters
             _state = state;
         }
 
+        /// <inheritdoc />
         public override bool IsValid(Update update, TelegramChat user, MessageCommand command, ITelegramBotData botData) {
             return user != null && _state.Contains(user.State);
         }

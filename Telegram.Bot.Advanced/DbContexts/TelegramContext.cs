@@ -3,6 +3,9 @@ using Telegram.Bot.Advanced.Models;
 
 namespace Telegram.Bot.Advanced.DbContexts
 {
+    /// <summary>
+    /// Extension of DbContext to include data structures used internally by this framework
+    /// </summary>
     public abstract class TelegramContext : DbContext {
         
         protected TelegramContext(DbContextOptions options)

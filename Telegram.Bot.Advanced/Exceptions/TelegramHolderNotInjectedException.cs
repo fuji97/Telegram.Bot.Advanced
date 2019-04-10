@@ -1,6 +1,10 @@
 using System;
 
 namespace Telegram.Bot.Advanced.Exceptions {
+    
+    /// <summary>
+    /// Throws if the TelegramHolder was not injected in the Dependecy Injection in the ConfigureServices
+    /// </summary>
     public class TelegramHolderNotInjectedException : Exception {
         public TelegramHolderNotInjectedException() { }
         public TelegramHolderNotInjectedException(string message) : base(message) { }

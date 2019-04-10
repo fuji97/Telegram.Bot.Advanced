@@ -6,6 +6,9 @@ using Telegram.Bot.Types.Enums;
 
 namespace Telegram.Bot.Advanced.Dispatcher.Filters
 {
+    /// <summary>
+    /// The method is eligible if the type of the chat matches with one of the passed types
+    /// </summary>
     public class ChatTypeFilter : DispatcherFilterAttribute {
         private readonly ChatType[] _type;
 
@@ -13,6 +16,7 @@ namespace Telegram.Bot.Advanced.Dispatcher.Filters
             _type = type;
         }
 
+        /// <inheritdoc />
         public override bool IsValid(Update update, TelegramChat user, MessageCommand command, ITelegramBotData botData) {
             return update.Message != null && _type.Contains(update.Message.Chat.Type);
         }
