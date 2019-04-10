@@ -10,6 +10,10 @@ using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Telegram.Bot.Advanced.Controller {
+    /// <summary>
+    /// Base implementation of ITelegramContext
+    /// </summary>
+    /// <typeparam name="TContext">Telegram context used by the application</typeparam>
     public class TelegramController<TContext> : ITelegramController<TContext> where TContext : TelegramContext {
         public MessageCommand MessageCommand { get; set; }
         public TContext TelegramContext { get; set; }
@@ -17,6 +21,18 @@ namespace Telegram.Bot.Advanced.Controller {
         public ITelegramBotData BotData { get; set; }
         public Update Update { get; set; }
 
+        /// <summary>
+        /// Shortcut to send a message to current chat
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="mode"></param>
+        /// <param name="disableWebPagePreview"></param>
+        /// <param name="disableNotification"></param>
+        /// <param name="replyToMessageId"></param>
+        /// <param name="replyMarkup"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <see cref="Telegram.Bot.TelegramBotClient.SendTextMessageAsync"/>
         protected async Task ReplyTextMessageAsync(string text, 
             ParseMode mode = ParseMode.Default, 
             bool disableWebPagePreview = false,
@@ -28,6 +44,16 @@ namespace Telegram.Bot.Advanced.Controller {
                 replyToMessageId, replyMarkup, cancellationToken);
         }
 
+        /// <summary>
+        /// Shortcut to send a sticker to current chat
+        /// </summary>
+        /// <param name="sticker"></param>
+        /// <param name="disableNotification"></param>
+        /// <param name="replyToMessageId"></param>
+        /// <param name="replyMarkup"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <see cref="Telegram.Bot.TelegramBotClient.SendStickerAsync"/>
         protected async Task ReplyStickerAsync(InputOnlineFile sticker,
             bool disableNotification = false,
             int replyToMessageId = 0,
@@ -37,6 +63,18 @@ namespace Telegram.Bot.Advanced.Controller {
                 replyMarkup, cancellationToken);
         }
 
+        /// <summary>
+        /// Shortcut to send a photo to current chat
+        /// </summary>
+        /// <param name="photo"></param>
+        /// <param name="caption"></param>
+        /// <param name="parseMode"></param>
+        /// <param name="disableNotification"></param>
+        /// <param name="replyToMessageId"></param>
+        /// <param name="replyMarkup"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <see cref="Telegram.Bot.TelegramBotClient.SendPhotoAsync"/>
         protected async Task ReplyPhotoAsync(InputOnlineFile photo,
             string caption = null,
             ParseMode parseMode = ParseMode.Default,
