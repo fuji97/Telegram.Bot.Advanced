@@ -83,113 +83,101 @@ namespace Telegram.Bot.Advanced.Dispatcher
             TContext context = scope.ServiceProvider.GetRequiredService<TContext>();
             _logger.LogInformation($"Received update - ID: {update.Id}");
             TelegramChat chat = null;
-            if (update.Type == UpdateType.Message)
-            {
+            if (update.Type == UpdateType.Message) {
                 var newChat = update.Message.Chat;
                 chat = await TelegramChat.GetAsync(context, newChat.Id);
 
-                if (chat != null)
-                {
-                    if (newChat.Username != null && chat.Username == newChat.Username)
-                    {
+                if (chat != null) {
+                    if (newChat.Username != null && chat.Username == newChat.Username) {
                         chat.Username = newChat.Username;
                     }
 
-                    if (newChat.Title != null && chat.Title == newChat.Title)
-                    {
+                    if (newChat.Title != null && chat.Title == newChat.Title) {
                         chat.Title = newChat.Title;
                     }
 
-                    if (newChat.Description != null && chat.Description == newChat.Description)
-                    {
+                    if (newChat.Description != null && chat.Description == newChat.Description) {
                         chat.Description = newChat.Description;
                     }
 
-                    if (newChat.InviteLink != null && chat.InviteLink == newChat.InviteLink)
-                    {
+                    if (newChat.InviteLink != null && chat.InviteLink == newChat.InviteLink) {
                         chat.InviteLink = newChat.InviteLink;
                     }
 
-                    if (newChat.LastName != null && chat.LastName == newChat.LastName)
-                    {
+                    if (newChat.LastName != null && chat.LastName == newChat.LastName) {
                         chat.LastName = newChat.LastName;
                     }
 
-                    if (newChat.StickerSetName != null && chat.StickerSetName == newChat.StickerSetName)
-                    {
+                    if (newChat.StickerSetName != null && chat.StickerSetName == newChat.StickerSetName) {
                         chat.StickerSetName = newChat.StickerSetName;
                     }
 
-                    if (newChat.FirstName != null && chat.FirstName == newChat.FirstName)
-                    {
+                    if (newChat.FirstName != null && chat.FirstName == newChat.FirstName) {
                         chat.FirstName = newChat.FirstName;
                     }
 
-                    if (newChat.CanSetStickerSet != null && chat.CanSetStickerSet == newChat.CanSetStickerSet)
-                    {
+                    if (newChat.CanSetStickerSet != null && chat.CanSetStickerSet == newChat.CanSetStickerSet) {
                         chat.CanSetStickerSet = newChat.CanSetStickerSet;
                     }
 
-                    if (chat.AllMembersAreAdministrators == newChat.AllMembersAreAdministrators)
-                    {
+                    if (chat.AllMembersAreAdministrators == newChat.AllMembersAreAdministrators) {
                         chat.AllMembersAreAdministrators = newChat.AllMembersAreAdministrators;
                     }
                 }
-                else
-                {
+                else {
                     chat = new TelegramChat(update.Message.Chat);
                     await context.AddAsync(chat);
                 }
+            }
 
-                MessageCommand command;
-                if (update.Type == UpdateType.Message)
+            MessageCommand command;
+            if (update.Type == UpdateType.Message)
+            {
+                command = new MessageCommand(update.Message);
+                if (command.Target != null && _botData.Username != null && command.Target != _botData.Username)
                 {
-                    command = new MessageCommand(update.Message);
-                    if (command.Target != null && _botData.Username != null && command.Target != _botData.Username)
-                    {
-                        _logger.LogDebug($"Command's target is @{command.Target} - Ignoring command");
-                        return;
-                    }
+                    _logger.LogDebug($"Command's target is @{command.Target} - Ignoring command");
+                    return;
+                }
+            }
+            else {
+                command = new MessageCommand();
+            }
+
+            SetControllerData(controller, update, command, context, chat, _botData);
+            
+            context.SaveChanges();
+            
+            _logger.LogTrace($"Command: {JsonConvert.SerializeObject(command, Formatting.Indented)}");
+            _logger.LogTrace($"Chat: {JsonConvert.SerializeObject(chat, Formatting.Indented)}");
+            
+            var firstMethod = _methods.FirstOrDefault(m => ((MemberInfo) m).GetCustomAttributes()
+                .Where(att => att is DispatcherFilterAttribute)
+                .All(attr =>
+                    ((DispatcherFilterAttribute) attr).IsValid(update,
+                        chat, command, _botData)));
+            
+            if (firstMethod != null) {
+                
+                if (firstMethod.GetCustomAttribute<AsyncStateMachineAttribute>() != null) {
+                    _logger.LogInformation($"Calling async method: {firstMethod.Name}");
+                    await (Task) firstMethod.Invoke(controller, null);
                 }
                 else {
-                    command = new MessageCommand();
+                    _logger.LogInformation($"Calling sync method: {firstMethod.Name}");
+                    firstMethod.Invoke(controller, null);
                 }
-
-                SetControllerData(controller, update, command, context, chat, _botData);
-                
-                context.SaveChanges();
-                
-                _logger.LogTrace($"Command: {JsonConvert.SerializeObject(command, Formatting.Indented)}");
-                _logger.LogTrace($"Chat: {JsonConvert.SerializeObject(chat, Formatting.Indented)}");
-                
-                var firstMethod = _methods.FirstOrDefault(m => ((MemberInfo) m).GetCustomAttributes()
-                    .Where(att => att is DispatcherFilterAttribute)
-                    .All(attr =>
-                        ((DispatcherFilterAttribute) attr).IsValid(update,
-                            chat, command, _botData)));
-                
-                if (firstMethod != null) {
-                    
-                    if (firstMethod.GetCustomAttribute<AsyncStateMachineAttribute>() != null) {
-                        _logger.LogInformation($"Calling async method: {firstMethod.Name}");
-                        await (Task) firstMethod.Invoke(controller, null);
-                    }
-                    else {
-                        _logger.LogInformation($"Calling sync method: {firstMethod.Name}");
-                        firstMethod.Invoke(controller, null);
-                    }
-                } else if (_noMethodsMethod != null) {
-                    if (_noMethodsMethod.GetCustomAttribute<AsyncStateMachineAttribute>() != null) {
-                        _logger.LogInformation("No valid method found to manage current request. Calling the async NoMethod: " + _noMethodsMethod.Name);
-                        await (Task) _noMethodsMethod.Invoke(controller, null);
-                    }
-                    else {
-                        _logger.LogInformation("No valid method found to manage current request. Calling the sync NoMethod: " + _noMethodsMethod.Name);
-                        _noMethodsMethod.Invoke(controller, null);
-                    }
-                } else {
-                    _logger.LogInformation("No valid method found to manage current request.");
+            } else if (_noMethodsMethod != null) {
+                if (_noMethodsMethod.GetCustomAttribute<AsyncStateMachineAttribute>() != null) {
+                    _logger.LogInformation("No valid method found to manage current request. Calling the async NoMethod: " + _noMethodsMethod.Name);
+                    await (Task) _noMethodsMethod.Invoke(controller, null);
                 }
+                else {
+                    _logger.LogInformation("No valid method found to manage current request. Calling the sync NoMethod: " + _noMethodsMethod.Name);
+                    _noMethodsMethod.Invoke(controller, null);
+                }
+            } else {
+                _logger.LogInformation("No valid method found to manage current request.");
             }
             _logger.LogTrace("End of dispatching");
         }
