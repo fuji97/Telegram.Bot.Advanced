@@ -14,6 +14,7 @@ using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.Dispatcher.Filters;
 using Telegram.Bot.Advanced.Holder;
 using Telegram.Bot.Advanced.Models;
+using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -174,7 +175,12 @@ namespace Telegram.Bot.Advanced.Dispatcher
                 }
                 else {
                     _logger.LogInformation("No valid method found to manage current request. Calling the sync NoMethod: " + _noMethodsMethod.Name);
-                    _noMethodsMethod.Invoke(controller, null);
+                    try {
+                        _noMethodsMethod.Invoke(controller, null);
+                    }
+                    catch (ApiRequestException e) {
+                        Console.WriteLine(e);
+                    }
                 }
             } else {
                 _logger.LogInformation("No valid method found to manage current request.");
