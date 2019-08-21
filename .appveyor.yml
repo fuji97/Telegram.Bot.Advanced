@@ -49,7 +49,7 @@ for:
       only:
         - master
 
-    version: 1.0.7
+    version: 1.0.8
     configuration: Release
 
   -
@@ -57,5 +57,5 @@ for:
       only:
         - develop
 
-    version: 1.0.7.{build}
+    version: 1.0.8.{build}
     configuration: Debug
