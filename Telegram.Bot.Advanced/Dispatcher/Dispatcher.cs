@@ -120,10 +120,6 @@ namespace Telegram.Bot.Advanced.Dispatcher
                     if (newChat.CanSetStickerSet != null && chat.CanSetStickerSet == newChat.CanSetStickerSet) {
                         chat.CanSetStickerSet = newChat.CanSetStickerSet;
                     }
-
-                    if (chat.AllMembersAreAdministrators == newChat.Permissions.CanChangeInfo) {
-                        chat.AllMembersAreAdministrators = newChat.Permissions.CanChangeInfo.GetValueOrDefault();
-                    }
                 }
                 else {
                     chat = new TelegramChat(update.Message.Chat);

@@ -24,7 +24,6 @@ namespace Telegram.Bot.Advanced.Models
         public string Title { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public bool AllMembersAreAdministrators { get; set; }
         public string Description { get; set; }
         public string InviteLink { get; set; }
         public string StickerSetName { get; set; }
@@ -45,7 +44,6 @@ namespace Telegram.Bot.Advanced.Models
             Title = update.Title;
             FirstName = update.FirstName;
             LastName = update.LastName;
-            AllMembersAreAdministrators = update.Permissions.CanChangeInfo.GetValueOrDefault();
             Description = update.Description;
             InviteLink = update.InviteLink;
             StickerSetName = update.StickerSetName;
