@@ -45,7 +45,7 @@ namespace Telegram.Bot.Advanced.Models
             Title = update.Title;
             FirstName = update.FirstName;
             LastName = update.LastName;
-            AllMembersAreAdministrators = update.AllMembersAreAdministrators;
+            AllMembersAreAdministrators = update.Permissions.CanChangeInfo.GetValueOrDefault();
             Description = update.Description;
             InviteLink = update.InviteLink;
             StickerSetName = update.StickerSetName;

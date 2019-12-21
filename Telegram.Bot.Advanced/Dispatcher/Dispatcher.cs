@@ -121,8 +121,8 @@ namespace Telegram.Bot.Advanced.Dispatcher
                         chat.CanSetStickerSet = newChat.CanSetStickerSet;
                     }
 
-                    if (chat.AllMembersAreAdministrators == newChat.AllMembersAreAdministrators) {
-                        chat.AllMembersAreAdministrators = newChat.AllMembersAreAdministrators;
+                    if (chat.AllMembersAreAdministrators == newChat.Permissions.CanChangeInfo) {
+                        chat.AllMembersAreAdministrators = newChat.Permissions.CanChangeInfo.GetValueOrDefault();
                     }
                 }
                 else {
