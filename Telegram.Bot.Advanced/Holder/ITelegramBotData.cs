@@ -1,4 +1,5 @@
 ﻿using Telegram.Bot.Advanced.Dispatcher;
+using Telegram.Bot.Advanced.Models;
 
 namespace Telegram.Bot.Advanced.Holder {
     public interface ITelegramBotData {
@@ -7,5 +8,9 @@ namespace Telegram.Bot.Advanced.Holder {
         IDispatcher Dispatcher { get; }
         string BasePath { get; }
         string Username { get; set; }
+        UserUpdate UserUpdate { get; set; }
+        IgnoreBehaviour GroupChatBehaviour { get; set; }
+        IgnoreBehaviour PrivateChatBehaviour { get; set; }
+        
     }
 }

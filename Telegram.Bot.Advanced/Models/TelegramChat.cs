@@ -18,7 +18,7 @@ namespace Telegram.Bot.Advanced.Models
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long Id { get; set; }
         public string Username { get; set; }
-        public int State { get; set; } = 0;
+        public string State { get; set; } = null;
         public ChatType Type { get; set; }
         public ChatRole Role { get; set; } = ChatRole.User;
         public string Title { get; set; }
@@ -29,6 +29,7 @@ namespace Telegram.Bot.Advanced.Models
         public string StickerSetName { get; set; }
         public bool? CanSetStickerSet { get; set; }
         public ICollection<Data> Data { get; set; } = new List<Data>();
+        public List<NewsletterChat> NewsletterChats { get; set; }
 
         public TelegramChat() {
         }
@@ -125,7 +126,6 @@ namespace Telegram.Bot.Advanced.Models
         public override int GetHashCode() {
             return Id.GetHashCode();
         }
-
     }
 
     

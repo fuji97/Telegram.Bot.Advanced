@@ -34,7 +34,7 @@ namespace Telegram.Bot.Advanced.TestServer.TelegramController {
             await BotData.Bot.SendTextMessageAsync(TelegramChat.Id, $"{MessageCommand.Text}");
         }
 
-        [CommandFilter("next"), ChatStateFilter(0)]
+        [CommandFilter("next"), DefaultChatStateFilter]
         public async Task NoState() {
             await BotData.Bot.SendTextMessageAsync(TelegramChat.Id, "Imposto stato uno");
             if (MessageCommand.Parameters.Count > 0) {
@@ -43,10 +43,10 @@ namespace Telegram.Bot.Advanced.TestServer.TelegramController {
             else {
                 TelegramChat["text"] = null;
             }
-            TelegramChat.State = 1;
+            TelegramChat.State = "1";
         }
         
-        [CommandFilter("next"), ChatStateFilter(1)]
+        [CommandFilter("next"), ChatStateFilter("1")]
         public async Task FirstState() {
             await BotData.Bot.SendTextMessageAsync(TelegramChat.Id, "Sei in stato uno, passi allo stato due");
             if (TelegramChat["text"] != null) {
@@ -57,16 +57,16 @@ namespace Telegram.Bot.Advanced.TestServer.TelegramController {
                 TelegramChat["text"] = MessageCommand.Parameters[0];
             }
             
-            TelegramChat.State = 2;
+            TelegramChat.State = "2";
         }
         
-        [CommandFilter("next"), ChatStateFilter(2)]
+        [CommandFilter("next"), ChatStateFilter("2")]
         public async Task SecondState() {
             await BotData.Bot.SendTextMessageAsync(TelegramChat.Id, "Sei in stato due, torni a senza stato");
             if (TelegramChat["text"] != null) {
                 await BotData.Bot.SendTextMessageAsync(TelegramChat.Id, TelegramChat["text"]);
             }
-            TelegramChat.State = 0;
+            TelegramChat.State = null;
         }
     }
 }

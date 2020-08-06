@@ -1,4 +1,5 @@
 using Telegram.Bot.Advanced.Dispatcher;
+using Telegram.Bot.Advanced.Models;
 
 namespace Telegram.Bot.Advanced.Holder {
     public class TelegramBotDataBuilder {
@@ -7,6 +8,7 @@ namespace Telegram.Bot.Advanced.Holder {
         private IDispatcher _dispatcher;
         private IDispatcherBuilder _builder;
         private string _basePath = "/telegram";
+        private UserUpdate _userUpdate = UserUpdate.PrivateMessage;
 
         public TelegramBotDataBuilder SetTelegramBotClient(ITelegramBotClient bot) {
             _bot = bot;
@@ -45,12 +47,18 @@ namespace Telegram.Bot.Advanced.Holder {
             return this;
         }
 
+        public TelegramBotDataBuilder SetUserUpdate(UserUpdate userUpdate) {
+            _userUpdate = userUpdate;
+
+            return this;
+        }
+
         public ITelegramBotData Build() {
             if (_builder != null) {
-                return new TelegramBotData(_bot, _builder, _endpoint, _basePath);
+                return new TelegramBotData(_bot, _builder, _endpoint, _basePath, _userUpdate);
             }
 
-            return new TelegramBotData(_bot, _dispatcher, _endpoint, _basePath);
+            return new TelegramBotData(_bot, _dispatcher, _endpoint, _basePath, _userUpdate);
         }
     }
 }

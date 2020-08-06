@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Telegram.Bot.Advanced.Controller;
 using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.Holder;
@@ -16,6 +18,7 @@ namespace Telegram.Bot.Advanced.Dispatcher {
 
         private ITelegramBotData _botData;
         private ILogger<Dispatcher<TContext, TController>> _logger;
+        private List<Type> _controllers;
 
         /// <inheritdoc />
         public IDispatcherBuilder SetTelegramBotData(ITelegramBotData botData) {
@@ -33,9 +36,17 @@ namespace Telegram.Bot.Advanced.Dispatcher {
             return this;
         }
 
+        
+        public IDispatcherBuilder AddControllers(params Type[] controllers) {
+            _controllers ??= new List<Type>();
+            _controllers.AddRange(controllers);
+
+            return this;
+        }
+
         /// <inheritdoc />
         public IDispatcher Build() {
-            return new Dispatcher<TContext,TController>(_botData, _logger);
+            return new Dispatcher<TContext,TController>(_botData, _logger, _controllers);
         }
     }
 }
