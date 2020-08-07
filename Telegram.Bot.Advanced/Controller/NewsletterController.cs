@@ -3,9 +3,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Telegram.Bot.Advanced.Core.Dispatcher;
+using Telegram.Bot.Advanced.Core.Dispatcher.Filters;
 using Telegram.Bot.Advanced.DbContexts;
-using Telegram.Bot.Advanced.Dispatcher;
-using Telegram.Bot.Advanced.Dispatcher.Filters;
 using Telegram.Bot.Advanced.Models;
 using Telegram.Bot.Advanced.Services;
 using Telegram.Bot.Types.Enums;
@@ -93,7 +93,6 @@ namespace Telegram.Bot.Advanced.Controller {
             var newsletter = _newsletterService.GetNewsletterByKeyAsync(newsletterKey);
 
             if (newsletter != null) {
-                // TODO Popolate TelegramChat.newsletterChats
                 TelegramChat.State = SendingNewsletterState;
                 TelegramChat["newsletter"] = newsletterKey;
                 await ReplyTextMessageAsync("Ok, now send me the text formatted as HTML");
@@ -174,11 +173,9 @@ namespace Telegram.Bot.Advanced.Controller {
 
     public static class NewsletterControllerExtensions {
         public static IDispatcherBuilder RegisterNewsletterController<TContext>(
-            this IDispatcherBuilder dispatcherBuilder, IServiceCollection services) where TContext : TelegramContext {
+            this IDispatcherBuilder dispatcherBuilder) where TContext : TelegramContext {
 
             dispatcherBuilder.AddControllers(typeof(NewsletterController<TContext>));
-            // TODO I don't like the idea of passing the IServiceCollection through this method
-            services.AddScoped<NewsletterController<TContext>>();
 
             return dispatcherBuilder;
         }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Telegram.Bot.Advanced.DbContexts;
 
 namespace Telegram.Bot.Advanced.Models {
     public class SendResult {

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.Models;
 
 namespace Telegram.Bot.Advanced.Services {

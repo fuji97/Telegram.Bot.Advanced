@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Telegram.Bot.Advanced.Holder;
+using Telegram.Bot.Advanced.Core.Holder;
 
 namespace Telegram.Bot.Advanced.TestServer.Controllers {
     [ApiController]

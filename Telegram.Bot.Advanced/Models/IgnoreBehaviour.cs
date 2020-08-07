@@ -4,6 +4,5 @@ namespace Telegram.Bot.Advanced.Models {
         IgnoreAllMessagesAndCommandsWithoutTarget,
         IgnoreNonCommandMessages,
         IgnoreAllMessages
-        // TODO Implements
     }
 }

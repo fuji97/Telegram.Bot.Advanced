@@ -55,7 +55,6 @@ namespace Telegram.Bot.Advanced.Services {
                     successes++;
                 }
                 catch (Exception e) {
-                    // TODO Maybe log?
                     errors.Add(chat, e);
                 }
             }
@@ -77,7 +76,6 @@ namespace Telegram.Bot.Advanced.Services {
                     successes++;
                 }
                 catch (Exception e) {
-                    // TODO Maybe log?
                     errors.Add(chat, e);
                 }
             }

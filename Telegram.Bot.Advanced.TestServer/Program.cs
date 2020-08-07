@@ -1,7 +1,10 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Events;
 using Telegram.Bot.Advanced.TestServer.Models;
 using Telegram.Bot.Advanced.TestServer.TelegramController;
 
@@ -19,18 +22,33 @@ namespace Telegram.Bot.Advanced.TestServer {
             if (mode == StartupTypeConst.Polling) {
                 _startupType = StartupType.Polling;
             }
-
-            CreateWebHostBuilder(args).Build().Run();
+            
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                .MinimumLevel.Override("System", LogEventLevel.Information)
+                .Enrich.FromLogContext()
+                .WriteTo.Console()
+                .CreateLogger();
+        
+            try
+            {
+                Log.Information("Starting up");
+                CreateWebHostBuilder(args).Build().Run();
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "Application start-up failed");
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) {
             var webhost = WebHost.CreateDefaultBuilder(args)
-                .ConfigureLogging((hostingContext, logging) => {
-                    logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
-                    logging.AddConsole();
-                    logging.AddDebug();
-                    logging.AddEventSourceLogger();
-                });
+                .UseSerilog();
             switch (_startupType) {
                 case StartupType.Polling:
                     webhost.UseStartup<StartupPolling>();

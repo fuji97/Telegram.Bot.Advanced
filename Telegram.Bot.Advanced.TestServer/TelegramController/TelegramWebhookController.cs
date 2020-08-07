@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Advanced.Controller;
-using Telegram.Bot.Advanced.Dispatcher.Filters;
+using Telegram.Bot.Advanced.Core.Dispatcher.Filters;
 
 namespace Telegram.Bot.Advanced.TestServer.TelegramController {
     public class TelegramWebhookController : TelegramController<TestTelegramContext> {

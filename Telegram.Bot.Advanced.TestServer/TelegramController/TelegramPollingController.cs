@@ -1,7 +1,8 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Advanced.Controller;
-using Telegram.Bot.Advanced.Dispatcher.Filters;
+using Telegram.Bot.Advanced.Core.Dispatcher.Filters;
+using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.Models;
 using Telegram.Bot.Advanced.Services;
 

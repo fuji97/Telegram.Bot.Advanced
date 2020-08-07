@@ -1,5 +1,7 @@
+using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.Models;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace Telegram.Bot.Advanced.Extensions {
     public static class TelegramBotExtensions {
@@ -11,6 +13,9 @@ namespace Telegram.Bot.Advanced.Extensions {
                 LastName = user.LastName
             };
         }
-        
+
+        public static bool IsGroup(this Chat chat) {
+            return chat.Type == ChatType.Group || chat.Type == ChatType.Supergroup;
+        }
     }
 }
