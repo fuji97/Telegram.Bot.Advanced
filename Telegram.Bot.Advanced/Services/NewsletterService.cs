@@ -83,6 +83,45 @@ namespace Telegram.Bot.Advanced.Services {
             return new SendResult(successes + errors.Count, errors.Count, successes, errors);
         }
 
+        /// <inheritdoc />
+        public async Task<SendResult> SendNewsletterAsync(Func<TelegramChat, Task> sendAction) {
+            var result = await _context.Users.ToListAsync();
+
+            var successes = 0;
+            Dictionary<TelegramChat, Exception> errors = new Dictionary<TelegramChat, Exception>();
+            
+            foreach (var chat in result) {
+                try {
+                    await sendAction(chat);
+                    successes++;
+                }
+                catch (Exception e) {
+                    errors.Add(chat, e);
+                }
+            }
+
+            return new SendResult(successes + errors.Count, errors.Count, successes, errors);
+        }
+
+        /// <inheritdoc />
+        public SendResult SendNewsletter(Action<TelegramChat>  sendAction) {
+            var result = _context.Users.ToList();
+
+            var successes = 0;
+            Dictionary<TelegramChat, Exception> errors = new Dictionary<TelegramChat, Exception>();
+
+            foreach (var chat in result) {
+                try {
+                    sendAction(chat);
+                    successes++;
+                }
+                catch (Exception e) {
+                    errors.Add(chat, e);
+                }
+            }
+            
+            return new SendResult(successes + errors.Count, errors.Count, successes, errors);
+        }
 
         /// <inheritdoc />
         public async Task<bool> SubscribeChatAsync(string newsletterKey, long chatId) {

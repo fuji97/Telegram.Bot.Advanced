@@ -25,6 +25,22 @@ namespace Telegram.Bot.Advanced.Services {
         SendResult SendNewsletter(string newsletterKey, Action<TelegramChat> sendAction);
         
         /// <summary>
+        /// Execute the action sendAction asynchronously for each chat. The TelegramChat parameter in the 
+        /// action change on every iteration for every chat.
+        /// </summary>
+        /// <param name="sendAction"></param>
+        /// <returns>The result of the operation</returns>
+        Task<SendResult> SendNewsletterAsync(Func<TelegramChat, Task> sendAction);
+        
+        /// <summary>
+        /// Execute the action sendAction for each chat. The TelegramChat parameter in the 
+        /// action change on every iteration for every chat.
+        /// </summary>
+        /// <param name="sendAction"></param>
+        /// <returns>The result of the operation</returns>
+        SendResult SendNewsletter(Action<TelegramChat> sendAction);
+        
+        /// <summary>
         /// Subscribe the chat to the newsletter asynchronously.
         /// </summary>
         /// <param name="newsletterKey"></param>
