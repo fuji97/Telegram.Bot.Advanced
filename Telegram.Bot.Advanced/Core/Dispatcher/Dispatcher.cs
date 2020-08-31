@@ -171,16 +171,17 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher
             switch (BotData!.UserUpdate) {
                 case UserUpdate.BotCommand:
                     if (command.IsCommand())
-                        await UpdateUser(update, context);
+                        await UpdateUser(update, context, chat);
                     break;
                 case UserUpdate.EveryMessage:
-                    await UpdateUser(update, context);
+                    await UpdateUser(update, context, chat);
                     break;
             }
 
             await context.SaveChangesAsync();
 
-            var firstMethod = FindFirstMethod(update, chat, command);
+            var eligibleControllers = FindEligibleControllers(update, chat, command);
+            var firstMethod = FindFirstMethod(eligibleControllers, update, chat, command);
             
             Logger.LogTrace($"Command: {JsonConvert.SerializeObject(command, Formatting.Indented)}");
             Logger.LogTrace($"Chat: {JsonConvert.SerializeObject(chat, Formatting.Indented)}");
@@ -223,20 +224,27 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher
             }
         }
 
-        private KeyValuePair<MethodInfo, Type> FindFirstMethod(Update update, TelegramChat chat, MessageCommand command) {
-            var firstMethod = Methods.FirstOrDefault(m => ((MemberInfo) m.Key).GetCustomAttributes()
-                .Where(att => att is DispatcherFilterAttribute)
-                .All(attr =>
-                    ((DispatcherFilterAttribute) attr).IsValid(update,
-                        chat, command, BotData)));
+        private Dictionary<MethodInfo, Type> FindEligibleControllers(Update update, TelegramChat chat,
+            MessageCommand command) {
+            var eligibleControllers = Methods.Where(m => 
+                    m.Value.GetCustomAttributes<DispatcherFilterAttribute>()
+                        .All(attr => attr.IsValid(update, chat, command, BotData)
+                    ))
+                .ToDictionary(k => k.Key, v => v.Value);
+            return eligibleControllers;
+        }
+
+        private KeyValuePair<MethodInfo, Type> FindFirstMethod(Dictionary<MethodInfo, Type> methods, Update update, TelegramChat chat, MessageCommand command) {
+            var firstMethod = methods.FirstOrDefault(m => 
+                m.Key.GetCustomAttributes<DispatcherFilterAttribute>()
+                .All(attr => attr.IsValid(update, chat, command, BotData)));
             return firstMethod;
         }
 
-        private async Task<TelegramChat> UpdateChat(Update update, TContext context) {
-            TelegramChat chat = null;
+        private async Task<TelegramChat> UpdateChat(Update update, TContext context, TelegramChat chat = null) {
             if (update.Type == UpdateType.Message) {
                 var newChat = update.Message.Chat;
-                chat = await TelegramChat.GetAsync(context, newChat.Id);
+                chat ??= await TelegramChat.GetAsync(context, newChat.Id);
 
                 if (chat != null) {
                     if (newChat.Username != null) chat.Username = newChat.Username;
@@ -264,8 +272,13 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher
             return chat;
         }
 
-        private async Task UpdateUser(Update update, TContext context) {
+        private async Task UpdateUser(Update update, TContext context, TelegramChat currentChat) {
             var updateUser = update.Message?.From;
+
+            if (updateUser?.Id == currentChat.Id) {
+                return;
+            }
+            
             if (updateUser != null) {
                 var storedUser = await context.Users.FirstOrDefaultAsync(u => u.Id == updateUser.Id);
                 if (storedUser != null) {

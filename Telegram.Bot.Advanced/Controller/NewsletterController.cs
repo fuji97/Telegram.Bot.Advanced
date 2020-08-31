@@ -106,39 +106,53 @@ namespace Telegram.Bot.Advanced.Controller {
             }
         }
         
+        [ChatRoleFilter(ChatRole.Administrator, ChatRole.Moderator), CommandFilter("send_global_newsletter")]
+        public async Task SendGlobalNewsletter() {
+            if (MessageCommand.Parameters.Count != 0) {
+                await ReplyTextMessageAsync("Usage:\n/send_newsletter");
+                return;
+            }
+            
+            TelegramChat.State = SendingNewsletterState;
+            TelegramChat["newsletter"] = null;
+            await ReplyTextMessageAsync("Ok, now send me the text formatted as HTML");
+
+            await TelegramContext.SaveChangesAsync();
+        }
+        
         [ChatRoleFilter(ChatRole.Administrator, ChatRole.Moderator), ChatStateFilter(SendingNewsletterState), 
          UpdateTypeFilter(UpdateType.Message), NoCommandFilter]
         public async Task SendNewsletterGetText() {
             var newsletterKey = TelegramChat["newsletter"];
             var newsletter = _newsletterService.GetNewsletterByKeyAsync(newsletterKey);
+            
+            Func<TelegramChat, Task> sendFunction;
+            switch (Update.Message.Type) {
+                case MessageType.Text:
+                    sendFunction = async chat => await BotData.Bot.SendTextMessageAsync(chat.Id, Update.Message.Text, ParseMode.Html);
+                    break;
+                case MessageType.Photo:
+                    sendFunction = async chat => await BotData.Bot.SendPhotoAsync(chat.Id, 
+                        Update.Message.Photo.First().FileId, 
+                        Update.Message.Text);
+                    break;
+                case MessageType.Audio:
+                    sendFunction = async chat => await BotData.Bot.SendAudioAsync(chat.Id,
+                        Update.Message.Audio.FileId,
+                        Update.Message.Text);
+                    break;
+                case MessageType.Sticker:
+                    sendFunction = async chat => await BotData.Bot.SendStickerAsync(chat.Id,
+                        Update.Message.Sticker.FileId);
+                    break;
+                // TODO Implements poll?
+                default:
+                    await ReplyTextMessageAsync("Only text, photo, audio or sticker is supported as a type of " +
+                                                "message, please send one of these type");
+                    return;
+            }
 
             if (newsletter != null) {
-                Func<TelegramChat, Task> sendFunction;
-                switch (Update.Message.Type) {
-                    case MessageType.Text:
-                        sendFunction = async chat => await BotData.Bot.SendTextMessageAsync(chat.Id, Update.Message.Text, ParseMode.Html);
-                        break;
-                    case MessageType.Photo:
-                        sendFunction = async chat => await BotData.Bot.SendPhotoAsync(chat.Id, 
-                            Update.Message.Photo.First().FileId, 
-                            Update.Message.Text);
-                        break;
-                    case MessageType.Audio:
-                        sendFunction = async chat => await BotData.Bot.SendAudioAsync(chat.Id,
-                            Update.Message.Audio.FileId,
-                            Update.Message.Text);
-                        break;
-                    case MessageType.Sticker:
-                        sendFunction = async chat => await BotData.Bot.SendStickerAsync(chat.Id,
-                            Update.Message.Sticker.FileId);
-                        break;
-                    // TODO Implements poll?
-                    default:
-                        await ReplyTextMessageAsync("Only text, photo, audio or sticker is supported as a type of " +
-                                                    "message, please send one of these type");
-                        return;
-                }
-
                 await ReplyTextMessageAsync("Ok, sending the newsletter...");
                 var result = await _newsletterService.SendNewsletterAsync(newsletterKey, sendFunction);
                 await ReplyTextMessageAsync("Finished - report:\n" +
@@ -147,10 +161,14 @@ namespace Telegram.Bot.Advanced.Controller {
                 TelegramChat.State = null;
                 await TelegramContext.SaveChangesAsync();
             }
-            else {
-                await ReplyTextMessageAsync(
-                    $"The newsletter {newsletterKey} doesn't exist.\n" +
-                    $"Use /create_newsletter {newsletterKey} - to create it");
+            else if (newsletterKey == null) {
+                await ReplyTextMessageAsync("Ok, sending the global newsletter...");
+                var result = await _newsletterService.SendNewsletterAsync(sendFunction);
+                await ReplyTextMessageAsync("Finished - report:\n" +
+                                            $"Successful delivery: {result.TotalSuccesses}\n" +
+                                            $"Failed delivery: {result.TotalErrors}");
+                TelegramChat.State = null;
+                await TelegramContext.SaveChangesAsync();
             }
         }
         
