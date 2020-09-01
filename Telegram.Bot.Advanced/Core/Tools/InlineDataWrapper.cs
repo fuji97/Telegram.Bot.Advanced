@@ -47,5 +47,9 @@ namespace Telegram.Bot.Advanced.Core.Tools {
             
             return new InlineDataWrapper(command, data);
         }
+
+        public static string QuickParse(string command, Dictionary<string, string> data) {
+            return new InlineDataWrapper(command, data).ToString();
+        }
     }
 }

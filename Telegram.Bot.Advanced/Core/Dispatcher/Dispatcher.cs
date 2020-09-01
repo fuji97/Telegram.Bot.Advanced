@@ -242,31 +242,32 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher
         }
 
         private async Task<TelegramChat> UpdateChat(Update update, TContext context, TelegramChat chat = null) {
-            if (update.Type == UpdateType.Message) {
-                var newChat = update.Message.Chat;
-                chat ??= await TelegramChat.GetAsync(context, newChat.Id);
+            if (update.Message?.Chat == null) 
+                return chat;
+            
+            var newChat = update.Message.Chat;
+            chat ??= await TelegramChat.GetAsync(context, newChat.Id);
 
-                if (chat != null) {
-                    if (newChat.Username != null) chat.Username = newChat.Username;
-                    if (newChat.Title != null) chat.Title = newChat.Title;
-                    if (newChat.Description != null) chat.Description = newChat.Description;
-                    if (newChat.InviteLink != null) chat.InviteLink = newChat.InviteLink;
-                    if (newChat.LastName != null) chat.LastName = newChat.LastName;
-                    if (newChat.StickerSetName != null) chat.StickerSetName = newChat.StickerSetName;
-                    if (newChat.FirstName != null) chat.FirstName = newChat.FirstName;
-                    if (newChat.CanSetStickerSet != null) chat.CanSetStickerSet = newChat.CanSetStickerSet;
-                }
-                else {
-                    chat = new TelegramChat(update.Message.Chat);
+            if (chat != null) {
+                if (newChat.Username != null) chat.Username = newChat.Username;
+                if (newChat.Title != null) chat.Title = newChat.Title;
+                if (newChat.Description != null) chat.Description = newChat.Description;
+                if (newChat.InviteLink != null) chat.InviteLink = newChat.InviteLink;
+                if (newChat.LastName != null) chat.LastName = newChat.LastName;
+                if (newChat.StickerSetName != null) chat.StickerSetName = newChat.StickerSetName;
+                if (newChat.FirstName != null) chat.FirstName = newChat.FirstName;
+                if (newChat.CanSetStickerSet != null) chat.CanSetStickerSet = newChat.CanSetStickerSet;
+            }
+            else {
+                chat = new TelegramChat(update.Message.Chat);
                     
-                    // Check if the chat has a default role and set it, if any
-                    var defaultRole = BotData.DefaultUserRole.FirstOrDefault(d => d.Equals(chat));
-                    if (defaultRole != null) {
-                        chat.Role = defaultRole.Role;
-                    }
-                    
-                    await context.AddAsync(chat);
+                // Check if the chat has a default role and set it, if any
+                var defaultRole = BotData.DefaultUserRole.FirstOrDefault(d => d.Equals(chat));
+                if (defaultRole != null) {
+                    chat.Role = defaultRole.Role;
                 }
+                    
+                await context.AddAsync(chat);
             }
 
             return chat;
