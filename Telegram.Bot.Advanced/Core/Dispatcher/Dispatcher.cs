@@ -185,9 +185,14 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher
             
             Logger.LogTrace($"Command: {JsonConvert.SerializeObject(command, Formatting.Indented)}");
             Logger.LogTrace($"Chat: {JsonConvert.SerializeObject(chat, Formatting.Indented)}");
-            
-            await SetupAndExecute(scope, update, firstMethod, command, context, chat);
-            
+
+            try {
+                await SetupAndExecute(scope, update, firstMethod, command, context, chat);
+            }
+            catch (Exception e) {
+                Logger.LogError(e, "An exception was thrown while dispatching the request.");
+            }
+
             Logger.LogTrace("End of dispatching");
         }
 
