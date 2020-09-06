@@ -191,6 +191,7 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher
             }
             catch (Exception e) {
                 Logger.LogError(e, "An exception was thrown while dispatching the request.");
+                throw;
             }
 
             Logger.LogTrace("End of dispatching");
