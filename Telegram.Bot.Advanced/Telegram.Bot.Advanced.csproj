@@ -6,8 +6,8 @@
     <Authors>Fuji97</Authors>
     <Company>Sidereal Works</Company>
     <Version>3.1.0</Version>
-    <AssemblyVersion>3.1.0</AssemblyVersion>
-    <FileVersion>3.1.0</FileVersion>
+    <AssemblyVersion>3.1.1</AssemblyVersion>
+    <FileVersion>3.1.1</FileVersion>
     <Description>An extension for Telegram.Bot to support dispatching based of filters and Dependency Injection</Description>
     <Copyright>Copyright © Federico Rapetti</Copyright>
     <PackageProjectUrl>https://github.com/fuji97/Telegram.Bot.Advanced</PackageProjectUrl>
@@ -15,12 +15,14 @@
     <PackageTags>Telegram Bot Api</PackageTags>
     <PackageLicenseFile>license.txt</PackageLicenseFile>
     <LangVersion>8</LangVersion>
+    <PackageVersion>3.1.2</PackageVersion>
+    <Title>Telegram.Bot.Advanced</Title>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.6" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.7" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.7" />
     <PackageReference Include="Telegram.Bot" Version="15.7.1" />
   </ItemGroup>
 

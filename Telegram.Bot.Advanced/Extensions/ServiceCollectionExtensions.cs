@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Telegram.Bot.Advanced.Holder;
+using Telegram.Bot.Advanced.Core.Holder;
 
 namespace Telegram.Bot.Advanced.Extensions {
     public static class ServiceCollectionExtensions {

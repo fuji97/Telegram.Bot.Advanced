@@ -14,6 +14,10 @@ namespace Telegram.Bot.Advanced.Models {
         public bool IsCommand() {
             return Command != null; 
         }
+
+        public bool IsEmpty() {
+            return Text == null;
+        }
         
         public MessageCommand() {}
 

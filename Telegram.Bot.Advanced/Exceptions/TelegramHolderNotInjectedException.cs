@@ -3,7 +3,7 @@ using System;
 namespace Telegram.Bot.Advanced.Exceptions {
     
     /// <summary>
-    /// Throws if the TelegramHolder was not injected in the Dependecy Injection in the ConfigureServices
+    /// Throws if the TelegramHolder was not injected in the DI Container in ConfigureServices
     /// </summary>
     public class TelegramHolderNotInjectedException : Exception {
         public TelegramHolderNotInjectedException() { }
@@ -18,7 +18,7 @@ namespace Telegram.Bot.Advanced.Exceptions {
 
         public override string ToString() {
             return
-                "ITelegramHolder was not injected in the Depdendency Injection, yuo have to set it by calling IServiceProvider.AddTelegramHolder()";
+                "ITelegramHolder was not injected in the DI container, yuo have to set it by calling IServiceCollection.AddTelegramHolder()";
         }
     }
 }

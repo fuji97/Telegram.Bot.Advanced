@@ -1,6 +1,6 @@
-﻿using Telegram.Bot.Advanced.DbContexts;
+﻿using Telegram.Bot.Advanced.Core.Holder;
+using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.Extensions;
-using Telegram.Bot.Advanced.Holder;
 using Telegram.Bot.Advanced.Models;
 using Telegram.Bot.Types;
 

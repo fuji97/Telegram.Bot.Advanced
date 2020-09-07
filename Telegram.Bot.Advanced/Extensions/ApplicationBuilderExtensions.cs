@@ -4,9 +4,10 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Telegram.Bot.Advanced.Core.Holder;
+using Telegram.Bot.Advanced.Core.Middlewares;
 using Telegram.Bot.Advanced.Exceptions;
-using Telegram.Bot.Advanced.Holder;
-using Telegram.Bot.Advanced.Middlewares;
+using Telegram.Bot.Advanced.Services;
 using Telegram.Bot.Types.Enums;
 
 namespace Telegram.Bot.Advanced.Extensions {
@@ -50,6 +51,42 @@ namespace Telegram.Bot.Advanced.Extensions {
                 bot.Username = (bot.Bot.GetMeAsync().Result).Username;
                 bot.Bot.StartReceiving(Array.Empty<UpdateType>());
             }
+            return app;
+        }
+
+        public static IApplicationBuilder UseStartupNewsletter(this IApplicationBuilder app) {
+            using (var scoped = app.ApplicationServices.CreateScope()) {
+                var holder = scoped.ServiceProvider.GetService<ITelegramHolder>();
+                if (holder == null) {
+                    throw new TelegramHolderNotInjectedException();
+                }
+            
+                var newsletterService = scoped.ServiceProvider.GetService<INewsletterService>();
+                if (newsletterService == null) {
+                    throw new NewsletterServiceNotInjectedException();
+                }
+
+                var logger = app.ApplicationServices.GetService<ILogger<IApplicationBuilder>>();
+
+                foreach (var botData in holder) {
+                    if (botData.StartupNewsletter != null) {
+                        if (newsletterService.GetNewsletterByKey(botData.StartupNewsletter.NewsletterKey) != null) {
+                            logger?.LogInformation("Bot @{Username}: sending startup message to newsletter {NewsletterKey}",
+                                botData.Username, botData.StartupNewsletter.NewsletterKey);
+                            var result = newsletterService.SendNewsletter(botData.StartupNewsletter.NewsletterKey, chat => {
+                                botData.StartupNewsletter.Action(botData, chat, app.ApplicationServices);
+                            });
+                            logger.LogInformation("Sending completed. Result: Successes: {TotalSuccesses} - " +
+                                                  "Failures: {TotalErrors}", 
+                                result.TotalSuccesses, result.TotalErrors);
+                        }
+                        else {
+                            logger?.LogWarning("The newsletter {NewsletterKey} doesn't exist", botData.StartupNewsletter.NewsletterKey);
+                        }
+                    }
+                }
+            }
+
             return app;
         }
     }

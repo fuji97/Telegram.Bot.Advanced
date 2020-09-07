@@ -5,9 +5,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Telegram.Bot.Advanced.Dispatcher;
+using Telegram.Bot.Advanced.Core.Dispatcher;
+using Telegram.Bot.Advanced.Core.Holder;
 using Telegram.Bot.Advanced.Extensions;
-using Telegram.Bot.Advanced.Holder;
 using Telegram.Bot.Advanced.TestServer.TelegramController;
 
 namespace Telegram.Bot.Advanced.TestServer {
@@ -21,13 +21,13 @@ namespace Telegram.Bot.Advanced.TestServer {
         public void ConfigureServices(IServiceCollection services) {
             services.AddEntityFrameworkInMemoryDatabase();
             services.AddDbContext<TestTelegramContext>();
-            
+
             services.AddTelegramHolder(
-                new TelegramBotDataBuilder()
-                    .CreateTelegramBotClient(_configuration["TELEGRAM_BOT_KEY"])
-                    .UseDispatcherBuilder(new DispatcherBuilder<TestTelegramContext, TelegramWebhookController>())
-                    .SetBasePath(_configuration["Telegram:Webhook"])
-                    .Build()
+                new TelegramBotData(options => {
+                    options.CreateTelegramBotClient(_configuration["BotToken"]);
+                    options.DispatcherBuilder = new DispatcherBuilder<TestTelegramContext, TelegramWebhookController>();
+                    options.BasePath = _configuration["Telegram:Webhook"];
+                })
             );
 
             services.AddMvc()
