@@ -109,7 +109,7 @@ namespace Telegram.Bot.Advanced.Controller {
         [ChatRoleFilter(ChatRole.Administrator, ChatRole.Moderator), CommandFilter("send_global_newsletter")]
         public async Task SendGlobalNewsletter() {
             if (MessageCommand.Parameters.Count != 0) {
-                await ReplyTextMessageAsync("Usage:\n/send_newsletter");
+                await ReplyTextMessageAsync("Usage:\n/send_global_newsletter");
                 return;
             }
             
@@ -124,7 +124,7 @@ namespace Telegram.Bot.Advanced.Controller {
          UpdateTypeFilter(UpdateType.Message), NoCommandFilter]
         public async Task SendNewsletterGetText() {
             var newsletterKey = TelegramChat["newsletter"];
-            var newsletter = _newsletterService.GetNewsletterByKeyAsync(newsletterKey);
+            var newsletter = await _newsletterService.GetNewsletterByKeyAsync(newsletterKey);
             
             Func<TelegramChat, Task> sendFunction;
             switch (Update.Message.Type) {

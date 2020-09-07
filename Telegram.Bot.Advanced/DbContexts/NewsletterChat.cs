@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using Newtonsoft.Json;
 
 namespace Telegram.Bot.Advanced.DbContexts {
     public class NewsletterChat {
@@ -6,7 +7,7 @@ namespace Telegram.Bot.Advanced.DbContexts {
         [ForeignKey(nameof(NewsletterKey))]
         public Newsletter Newsletter { get; set; }
         public long ChatId { get; set; }
-        [ForeignKey(nameof(ChatId))]
+        [ForeignKey(nameof(ChatId)), JsonIgnore]
         public TelegramChat Chat { get; set; }
         
         public NewsletterChat(Newsletter newsletter, TelegramChat chat) {

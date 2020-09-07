@@ -32,14 +32,14 @@ namespace Telegram.Bot.Advanced.Controller {
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <see cref="Telegram.Bot.TelegramBotClient.SendTextMessageAsync"/>
-        protected async Task ReplyTextMessageAsync(string text, 
+        protected async Task<Message> ReplyTextMessageAsync(string text, 
             ParseMode mode = ParseMode.Default, 
             bool disableWebPagePreview = false,
             bool disableNotification = false,
             int replyToMessageId = 0,
             IReplyMarkup replyMarkup = null,
             CancellationToken cancellationToken = default (CancellationToken)) {
-            await BotData.Bot.SendTextMessageAsync(TelegramChat.Id, text, mode, disableWebPagePreview, disableNotification, 
+            return await BotData.Bot.SendTextMessageAsync(TelegramChat.Id, text, mode, disableWebPagePreview, disableNotification, 
                 replyToMessageId, replyMarkup, cancellationToken);
         }
 
@@ -53,12 +53,12 @@ namespace Telegram.Bot.Advanced.Controller {
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <see cref="Telegram.Bot.TelegramBotClient.SendStickerAsync"/>
-        protected async Task ReplyStickerAsync(InputOnlineFile sticker,
+        protected async Task<Message> ReplyStickerAsync(InputOnlineFile sticker,
             bool disableNotification = false,
             int replyToMessageId = 0,
             IReplyMarkup replyMarkup = null,
             CancellationToken cancellationToken = default (CancellationToken)) {
-            await BotData.Bot.SendStickerAsync(TelegramChat.Id, sticker, disableNotification, replyToMessageId,
+            return await BotData.Bot.SendStickerAsync(TelegramChat.Id, sticker, disableNotification, replyToMessageId,
                 replyMarkup, cancellationToken);
         }
 
@@ -74,14 +74,14 @@ namespace Telegram.Bot.Advanced.Controller {
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <see cref="Telegram.Bot.TelegramBotClient.SendPhotoAsync"/>
-        protected async Task ReplyPhotoAsync(InputOnlineFile photo,
+        protected async Task<Message> ReplyPhotoAsync(InputOnlineFile photo,
             string caption = null,
             ParseMode parseMode = ParseMode.Default,
             bool disableNotification = false,
             int replyToMessageId = 0,
             IReplyMarkup replyMarkup = null,
             CancellationToken cancellationToken = default (CancellationToken)) {
-            await BotData.Bot.SendPhotoAsync(TelegramChat.Id, photo, caption, parseMode, disableNotification,
+            return await BotData.Bot.SendPhotoAsync(TelegramChat.Id, photo, caption, parseMode, disableNotification,
                 replyToMessageId, replyMarkup, cancellationToken);
         }
     }

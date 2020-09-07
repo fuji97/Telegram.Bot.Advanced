@@ -115,6 +115,10 @@ namespace Telegram.Bot.Advanced.DbContexts
             return user;
         }
 
+        public ChatId ToChatId() {
+            return new ChatId(Id);
+        }
+
         public override bool Equals(object obj) {
             if (obj is TelegramChat chat)
                 return Id == chat.Id;

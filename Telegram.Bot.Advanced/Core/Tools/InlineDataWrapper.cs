@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -31,20 +32,22 @@ namespace Telegram.Bot.Advanced.Core.Tools {
 
         public static InlineDataWrapper ParseInlineData(string inlineData) {
             string command = null;
-            Dictionary<string, string> data = null;
-            var matches = Regex.Matches(inlineData, "^(.*?)&(.*)$");
+            Dictionary<string, string> data = new Dictionary<string, string>();
+            var match = Regex.Match(inlineData, "^(.+)?&(.+)?$");
 
-            if (matches[1].Success) {
-                command = HttpUtility.UrlDecode(matches[1].Value);
+            if (match.Success) {
+                if (match.Groups[1].Success) {
+                    command = HttpUtility.UrlDecode(match.Groups[1].Value);
+                }
+
+                if (match.Groups[2].Success) {
+                    var rawData = match.Groups[2].Value;
+                    var query = HttpUtility.ParseQueryString(rawData);
+
+                    data = query.AllKeys.ToDictionary(k => k, k => query[k]);
+                }
             }
 
-            if (matches[2].Success) {
-                var rawData = matches[2].Value;
-                var query = HttpUtility.ParseQueryString(rawData);
-
-                data = query.AllKeys.ToDictionary(k => k, k => query[k]);
-            }
-            
             return new InlineDataWrapper(command, data);
         }
 

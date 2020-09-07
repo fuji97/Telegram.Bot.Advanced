@@ -180,8 +180,24 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher
 
             await context.SaveChangesAsync();
 
-            var eligibleControllers = FindEligibleControllers(update, chat, command);
-            var firstMethod = FindFirstMethod(eligibleControllers, update, chat, command);
+            Dictionary<MethodInfo, Type> eligibleControllers;
+            KeyValuePair<MethodInfo, Type> firstMethod;
+
+            try {
+                eligibleControllers = FindEligibleControllers(update, chat, command);
+            }
+            catch (Exception e) {
+                Logger.LogError(e, "An exception was thrown while filtering the eligible controllers.");
+                throw;
+            }
+
+            try {
+                firstMethod = FindFirstMethod(eligibleControllers, update, chat, command);
+            }
+            catch (Exception e) {
+                Logger.LogError(e, "An exception was thrown while filtering the eligible methods.");
+                throw;
+            }
             
             Logger.LogTrace($"Command: {JsonConvert.SerializeObject(command, Formatting.Indented)}");
             Logger.LogTrace($"Chat: {JsonConvert.SerializeObject(chat, Formatting.Indented)}");
@@ -248,10 +264,10 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher
         }
 
         private async Task<TelegramChat> UpdateChat(Update update, TContext context, TelegramChat chat = null) {
-            if (update.Message?.Chat == null) 
+            if (update.GetMessage()?.Chat == null) 
                 return chat;
             
-            var newChat = update.Message.Chat;
+            var newChat = update.GetMessage().Chat;
             chat ??= await TelegramChat.GetAsync(context, newChat.Id);
 
             if (chat != null) {
@@ -280,7 +296,7 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher
         }
 
         private async Task UpdateUser(Update update, TContext context, TelegramChat currentChat) {
-            var updateUser = update.Message?.From;
+            var updateUser = update.GetMessage()?.From;
 
             if (updateUser?.Id == currentChat.Id) {
                 return;
