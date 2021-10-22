@@ -2,6 +2,7 @@
 using System.Linq;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
@@ -48,7 +49,10 @@ namespace Telegram.Bot.Advanced.TestServer {
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) {
             var webhost = WebHost.CreateDefaultBuilder(args)
-                .UseSerilog();
+                .UseSerilog()
+                .ConfigureAppConfiguration((hostingContext, config) => {
+                    config.AddUserSecrets<Program>();
+                });
             switch (_startupType) {
                 case StartupType.Polling:
                     webhost.UseStartup<StartupPolling>();
