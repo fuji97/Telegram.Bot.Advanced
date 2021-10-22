@@ -39,8 +39,8 @@ namespace Telegram.Bot.Advanced.Controller {
             int replyToMessageId = 0,
             IReplyMarkup replyMarkup = null,
             CancellationToken cancellationToken = default (CancellationToken)) {
-            return await BotData.Bot.SendTextMessageAsync(TelegramChat.Id, text, mode, disableWebPagePreview, disableNotification, 
-                replyToMessageId, replyMarkup, cancellationToken);
+            return await BotData.Bot.SendTextMessageAsync(TelegramChat.Id, text, mode, null, disableWebPagePreview, disableNotification, 
+                replyToMessageId, true, replyMarkup, cancellationToken);
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace Telegram.Bot.Advanced.Controller {
             IReplyMarkup replyMarkup = null,
             CancellationToken cancellationToken = default (CancellationToken)) {
             return await BotData.Bot.SendStickerAsync(TelegramChat.Id, sticker, disableNotification, replyToMessageId,
-                replyMarkup, cancellationToken);
+                true, replyMarkup, cancellationToken);
         }
 
         /// <summary>
@@ -81,8 +81,8 @@ namespace Telegram.Bot.Advanced.Controller {
             int replyToMessageId = 0,
             IReplyMarkup replyMarkup = null,
             CancellationToken cancellationToken = default (CancellationToken)) {
-            return await BotData.Bot.SendPhotoAsync(TelegramChat.Id, photo, caption, parseMode, disableNotification,
-                replyToMessageId, replyMarkup, cancellationToken);
+            return await BotData.Bot.SendPhotoAsync(TelegramChat.Id, photo, caption, parseMode, null, disableNotification,
+                replyToMessageId, true, replyMarkup, cancellationToken);
         }
     }
 }
