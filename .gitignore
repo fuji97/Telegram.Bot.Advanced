@@ -260,3 +260,6 @@ paket-files/
 __pycache__/
 *.pyc
 Telegram.Bot.Advanced/Properties/PublishProfiles/
+
+# Custom
+**/nuget.config

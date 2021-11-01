@@ -14,7 +14,7 @@
     <PackageTags>Telegram Bot Api</PackageTags>
     <PackageLicenseFile>license.txt</PackageLicenseFile>
     <LangVersion>9</LangVersion>
-    <PackageVersion>3.1.2.1</PackageVersion>
+    <PackageVersion>5.0-beta</PackageVersion>
     <Title>Telegram.Bot.Advanced</Title>
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
