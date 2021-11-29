@@ -13,10 +13,10 @@
     <RepositoryUrl>https://github.com/fuji97/Telegram.Bot.Advanced</RepositoryUrl>
     <PackageTags>Telegram Bot Api</PackageTags>
     <PackageLicenseFile>license.txt</PackageLicenseFile>
-    <LangVersion>9</LangVersion>
+    <LangVersion>10</LangVersion>
     <PackageVersion>5.0-beta</PackageVersion>
     <Title>Telegram.Bot.Advanced</Title>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
