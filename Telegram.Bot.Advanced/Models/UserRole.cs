@@ -19,7 +19,7 @@ namespace Telegram.Bot.Advanced.Models {
             Role = role;
         }
 
-        public bool Equals(TelegramChat chat) {
+        public bool Equals(TelegramChat? chat) {
             switch (SelectUserBy) {
                 case SelectUserBy.Username:
                     return Username == chat.Username;

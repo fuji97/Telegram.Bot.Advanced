@@ -19,7 +19,7 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher.Filters
         }
 
         /// <inheritdoc />
-        public override bool IsValid(Update update, TelegramChat user, MessageCommand command, ITelegramBotData botData) {
+        public override bool IsValid(Update update, TelegramChat? user, MessageCommand? command, ITelegramBotData botData) {
             return update.GetMessage() != null && _type.Contains(update.GetMessage().Chat.Type);
         }
     }

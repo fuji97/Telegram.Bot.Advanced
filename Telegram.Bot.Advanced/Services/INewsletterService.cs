@@ -62,8 +62,8 @@ namespace Telegram.Bot.Advanced.Services {
         bool IsChatSubscribedToNewsletter(string newsletterKey, long chatId);
         Task<List<Newsletter>> GetNewslettersAsync();
         List<Newsletter> GetNewsletters();
-        Task<Newsletter> GetNewsletterByKeyAsync(string newsletterKey);
-        Newsletter GetNewsletterByKey(string newsletterKey);
+        Task<Newsletter?> GetNewsletterByKeyAsync(string newsletterKey);
+        Newsletter? GetNewsletterByKey(string newsletterKey);
         Task<bool> CreateNewsletterAsync(Newsletter newsletter);
         bool CreateNewsletter(Newsletter newsletter);
 

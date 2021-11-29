@@ -15,7 +15,7 @@ namespace Telegram.Bot.Advanced.Extensions {
         }
 
         public static bool IsGroup(this Chat chat) {
-            return chat.Type == ChatType.Group || chat.Type == ChatType.Supergroup;
+            return chat.Type is ChatType.Group or ChatType.Supergroup;
         }
     }
 }

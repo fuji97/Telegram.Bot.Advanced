@@ -1,12 +1,10 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Advanced.Core.Dispatcher;
 using Telegram.Bot.Advanced.Core.Dispatcher.Filters;
 using Telegram.Bot.Advanced.DbContexts;
-using Telegram.Bot.Advanced.Models;
 using Telegram.Bot.Advanced.Services;
 using Telegram.Bot.Types.Enums;
 
@@ -90,7 +88,7 @@ namespace Telegram.Bot.Advanced.Controller {
             }
 
             var newsletterKey = MessageCommand.Parameters[0];
-            var newsletter = _newsletterService.GetNewsletterByKeyAsync(newsletterKey);
+            var newsletter = await _newsletterService.GetNewsletterByKeyAsync(newsletterKey);
 
             if (newsletter != null) {
                 TelegramChat.State = SendingNewsletterState;
@@ -124,26 +122,30 @@ namespace Telegram.Bot.Advanced.Controller {
          UpdateTypeFilter(UpdateType.Message), NoCommandFilter]
         public async Task SendNewsletterGetText() {
             var newsletterKey = TelegramChat["newsletter"];
-            var newsletter = await _newsletterService.GetNewsletterByKeyAsync(newsletterKey);
             
+            Newsletter? newsletter = null;
+            if (newsletterKey is not null) {
+                newsletter = await _newsletterService.GetNewsletterByKeyAsync(newsletterKey);
+            }
+
             Func<TelegramChat, Task> sendFunction;
-            switch (Update.Message.Type) {
+            switch (Update.Message?.Type) {
                 case MessageType.Text:
-                    sendFunction = async chat => await BotData.Bot.SendTextMessageAsync(chat.Id, Update.Message.Text, ParseMode.Html);
+                    sendFunction = async chat => await BotData.Bot.SendTextMessageAsync(chat.Id, Update.Message.Text!, ParseMode.Html);
                     break;
                 case MessageType.Photo:
                     sendFunction = async chat => await BotData.Bot.SendPhotoAsync(chat.Id, 
-                        Update.Message.Photo.First().FileId, 
+                        Update.Message!.Photo!.First().FileId, 
                         Update.Message.Text);
                     break;
                 case MessageType.Audio:
                     sendFunction = async chat => await BotData.Bot.SendAudioAsync(chat.Id,
-                        Update.Message.Audio.FileId,
+                        Update.Message!.Audio!.FileId,
                         Update.Message.Text);
                     break;
                 case MessageType.Sticker:
                     sendFunction = async chat => await BotData.Bot.SendStickerAsync(chat.Id,
-                        Update.Message.Sticker.FileId);
+                        Update.Message!.Sticker!.FileId);
                     break;
                 // TODO Implements poll?
                 default:
@@ -154,7 +156,7 @@ namespace Telegram.Bot.Advanced.Controller {
 
             if (newsletter != null) {
                 await ReplyTextMessageAsync("Ok, sending the newsletter...");
-                var result = await _newsletterService.SendNewsletterAsync(newsletterKey, sendFunction);
+                var result = await _newsletterService.SendNewsletterAsync(newsletterKey!, sendFunction);
                 await ReplyTextMessageAsync("Finished - report:\n" +
                                             $"Successful delivery: {result.TotalSuccesses}\n" +
                                             $"Failed delivery: {result.TotalErrors}");
@@ -175,11 +177,11 @@ namespace Telegram.Bot.Advanced.Controller {
         
 
         private async Task<bool> CheckIfAdminInGroups() {
-            if (TelegramChat.Type == ChatType.Supergroup || TelegramChat.Type == ChatType.Group) {
+            if (TelegramChat.Type is ChatType.Supergroup or ChatType.Group) {
                 var administrators = (await BotData.Bot.GetChatAdministratorsAsync(TelegramChat.Id))
                     .Select(a => a.User.Id);
 
-                if (!administrators.Contains(Update.Message.From.Id)) {
+                if (Update.Message?.From is null || !administrators.Contains(Update.Message.From.Id)) {
                     // Do not answer, just to avoid bot spam
                     return false;
                 }

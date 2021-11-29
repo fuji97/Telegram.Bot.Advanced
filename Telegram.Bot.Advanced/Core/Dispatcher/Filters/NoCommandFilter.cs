@@ -7,7 +7,7 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher.Filters
 {
     public class NoCommandFilter : DispatcherFilterAttribute
     {
-        public override bool IsValid(Update update, TelegramChat user, MessageCommand command, ITelegramBotData botData) {
+        public override bool IsValid(Update update, TelegramChat? user, MessageCommand? command, ITelegramBotData botData) {
             return command == null || !command.IsCommand();
         }
     }

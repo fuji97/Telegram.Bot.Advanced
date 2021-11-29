@@ -15,19 +15,19 @@ namespace Telegram.Bot.Advanced.DbContexts
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long Id { get; set; }
-        public string Username { get; set; }
-        public string State { get; set; } = null;
+        public string? Username { get; set; }
+        public string? State { get; set; } = null;
         public ChatType Type { get; set; }
         public ChatRole Role { get; set; } = ChatRole.User;
-        public string Title { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Description { get; set; }
-        public string InviteLink { get; set; }
-        public string StickerSetName { get; set; }
+        public string? Title { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? Description { get; set; }
+        public string? InviteLink { get; set; }
+        public string? StickerSetName { get; set; }
         public bool? CanSetStickerSet { get; set; }
         public ICollection<Data> Data { get; set; } = new List<Data>();
-        public List<NewsletterChat> NewsletterChats { get; set; }
+        public List<NewsletterChat> NewsletterChats { get; set; } = new();
 
         public TelegramChat() {
         }
@@ -47,19 +47,20 @@ namespace Telegram.Bot.Advanced.DbContexts
             InviteLink = update.InviteLink;
             StickerSetName = update.StickerSetName;
             CanSetStickerSet = update.CanSetStickerSet;
+            NewsletterChats = new List<NewsletterChat>();
         }
 
-        public void AddData(string key, string value) {
-            if (Data.Count(d => d.Key == key) > 0) {
+        public void AddData(string key, string? value) {
+            if (Data.Any(d => d.Key == key)) {
                 throw new DuplicateDataKeyException();
             }
 
             Data.Add(new Data(this, key, value));
         }
 
-        public void UpdateData(string key, string value) {
+        public void UpdateData(string key, string? value) {
             var data = Data.FirstOrDefault(d => d.Key == key);
-            if (data != null) {
+            if (data is not null) {
                 data.Value = value;
             }
             else {
@@ -67,14 +68,14 @@ namespace Telegram.Bot.Advanced.DbContexts
             }
         }
 
-        public string this[string key]
+        public string? this[string key]
         {
             get {
                 return Data.FirstOrDefault(d => d.Key == key)?.Value;
             }
             set {
                 var anotherName = Data.FirstOrDefault(d => d.Key == key);
-                if (anotherName != null) {
+                if (anotherName is not null) {
                     anotherName.Value = value;
                 }
                 else
@@ -100,12 +101,12 @@ namespace Telegram.Bot.Advanced.DbContexts
             
         }
 
-        public static TelegramChat Get(TelegramContext context, long id) {
+        public static TelegramChat? Get(TelegramContext context, long id) {
             var user = context.Users.Include(chat => chat.Data).FirstOrDefault(u => u.Id == id);
             return user;
         }
 
-        public static async Task<TelegramChat> GetAsync(TelegramContext context, long id)
+        public static async Task<TelegramChat?> GetAsync(TelegramContext context, long id)
         {
             var user = await context.Users
                 .Include(chat => chat.Data)
@@ -119,7 +120,7 @@ namespace Telegram.Bot.Advanced.DbContexts
             return new ChatId(Id);
         }
 
-        public override bool Equals(object obj) {
+        public override bool Equals(object? obj) {
             if (obj is TelegramChat chat)
                 return Id == chat.Id;
             return false;

@@ -5,10 +5,10 @@ using Telegram.Bot.Advanced.Models;
 namespace Telegram.Bot.Advanced.Core.Holder {
     [Obsolete("Use the TelegramBotData constructor with options instead")]
     public class TelegramBotDataBuilder {
-        private string _endpoint;
-        private ITelegramBotClient _bot;
-        private IDispatcher _dispatcher;
-        private IDispatcherBuilder _builder;
+        private string? _endpoint;
+        private ITelegramBotClient? _bot;
+        private IDispatcher? _dispatcher;
+        private IDispatcherBuilder? _builder;
         private string _basePath = "/telegram";
         private UserUpdate _userUpdate = UserUpdate.PrivateMessage;
 

@@ -9,7 +9,7 @@ namespace Telegram.Bot.Advanced.Core.Holder {
         public ITelegramBotClient Bot { get; private set; }
         public IDispatcher Dispatcher { get; private set; }
         public string BasePath { get; private set; }
-        public string Username { get; set; }
+        public string? Username { get; set; }
         public UserUpdate UserUpdate { get; set; }
         public IgnoreBehaviour GroupChatBehaviour { get; set; }
         public IgnoreBehaviour PrivateChatBehaviour { get; set; }

@@ -11,7 +11,7 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher.Filters {
             _qnt = qnt;
         }
         
-        public override bool IsValid(Update update, TelegramChat chat, MessageCommand command, ITelegramBotData botData) {
+        public override bool IsValid(Update update, TelegramChat? chat, MessageCommand? command, ITelegramBotData botData) {
             return command.Parameters.Count == _qnt;
         }
     }

@@ -5,13 +5,13 @@ namespace Telegram.Bot.Advanced.DbContexts
     public class Data {
         public long UserId { get; set; }
         public string Key { get; set; }
-        public string Value { get; set; }
+        public string? Value { get; set; }
         [JsonIgnore]
         public TelegramChat Chat { get; set; }
 
         public Data() { }
 
-        public Data(TelegramChat user, string key, string value) {
+        public Data(TelegramChat user, string key, string? value) {
             UserId = user.Id;
             Key = key;
             Value = value;
@@ -37,7 +37,7 @@ namespace Telegram.Bot.Advanced.DbContexts
             }
         }
 
-        public static bool operator ==(Data left, Data right) {
+        public static bool operator ==(Data? left, Data? right) {
             if (ReferenceEquals(null, left) && ReferenceEquals(null, right))
             {
                 return false;
@@ -50,7 +50,7 @@ namespace Telegram.Bot.Advanced.DbContexts
             return left.Equals(right);
         }
 
-        public static bool operator !=(Data left, Data right)
+        public static bool operator !=(Data? left, Data? right)
         {
             if (ReferenceEquals(null, left) && ReferenceEquals(null, right)) {
                 return false;
