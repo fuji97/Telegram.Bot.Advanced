@@ -13,6 +13,6 @@ namespace Telegram.Bot.Advanced.Core.Holder {
         IgnoreBehaviour GroupChatBehaviour { get; set; }
         IgnoreBehaviour PrivateChatBehaviour { get; set; }
         IList<UserRole> DefaultUserRole { get; set; }
-        public StartupNewsletter StartupNewsletter { get; set; }
+        public StartupNewsletter? StartupNewsletter { get; set; }
     }
 }

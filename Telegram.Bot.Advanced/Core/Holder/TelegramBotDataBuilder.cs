@@ -57,10 +57,10 @@ namespace Telegram.Bot.Advanced.Core.Holder {
 
         public ITelegramBotData Build() {
             if (_builder != null) {
-                return new TelegramBotData(_bot, _builder, _endpoint, _basePath, _userUpdate);
+                return new TelegramBotData(_bot!, _builder, _endpoint!, _basePath, _userUpdate);
             }
 
-            return new TelegramBotData(_bot, _dispatcher, _endpoint, _basePath, _userUpdate);
+            return new TelegramBotData(_bot!, _dispatcher!, _endpoint!, _basePath, _userUpdate);
         }
     }
 }

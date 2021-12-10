@@ -34,7 +34,7 @@ namespace Telegram.Bot.Advanced.Controller {
             var newsletters = await _newsletterService.GetNewslettersAsync();
 
             if (newsletters.Any(n => n.Key == newsletterKey)) {
-                var result = await _newsletterService.SubscribeChatAsync(newsletterKey, TelegramChat.Id);
+                var result = await _newsletterService.SubscribeChatAsync(newsletterKey, TelegramChat!.Id);
                 if (result) {
                     await ReplyTextMessageAsync(
                         $"Successfully subscribed to the {newsletterKey} newsletter");
@@ -62,7 +62,7 @@ namespace Telegram.Bot.Advanced.Controller {
             var newsletters = await _newsletterService.GetNewslettersAsync();
 
             if (newsletters.Any(n => n.Key == newsletterKey)) {
-                if (await _newsletterService.IsChatSubscribedToNewsletterAsync(newsletterKey, TelegramChat.Id)) {
+                if (await _newsletterService.IsChatSubscribedToNewsletterAsync(newsletterKey, TelegramChat!.Id)) {
                     var result = await _newsletterService.SubscribeChatAsync(newsletterKey, TelegramChat.Id);
                     if (result) {
                         await ReplyTextMessageAsync(
@@ -91,7 +91,7 @@ namespace Telegram.Bot.Advanced.Controller {
             var newsletter = await _newsletterService.GetNewsletterByKeyAsync(newsletterKey);
 
             if (newsletter != null) {
-                TelegramChat.State = SendingNewsletterState;
+                TelegramChat!.State = SendingNewsletterState;
                 TelegramChat["newsletter"] = newsletterKey;
                 await ReplyTextMessageAsync("Ok, now send me the text formatted as HTML");
 
@@ -111,7 +111,7 @@ namespace Telegram.Bot.Advanced.Controller {
                 return;
             }
             
-            TelegramChat.State = SendingNewsletterState;
+            TelegramChat!.State = SendingNewsletterState;
             TelegramChat["newsletter"] = null;
             await ReplyTextMessageAsync("Ok, now send me the text formatted as HTML");
 
@@ -121,7 +121,7 @@ namespace Telegram.Bot.Advanced.Controller {
         [ChatRoleFilter(ChatRole.Administrator, ChatRole.Moderator), ChatStateFilter(SendingNewsletterState), 
          UpdateTypeFilter(UpdateType.Message), NoCommandFilter]
         public async Task SendNewsletterGetText() {
-            var newsletterKey = TelegramChat["newsletter"];
+            var newsletterKey = TelegramChat!["newsletter"];
             
             Newsletter? newsletter = null;
             if (newsletterKey is not null) {
@@ -177,7 +177,7 @@ namespace Telegram.Bot.Advanced.Controller {
         
 
         private async Task<bool> CheckIfAdminInGroups() {
-            if (TelegramChat.Type is ChatType.Supergroup or ChatType.Group) {
+            if (TelegramChat is {Type: ChatType.Supergroup or ChatType.Group}) {
                 var administrators = (await BotData.Bot.GetChatAdministratorsAsync(TelegramChat.Id))
                     .Select(a => a.User.Id);
 

@@ -100,7 +100,7 @@ namespace Telegram.Bot.Advanced.Extensions {
                             var result = newsletterService.SendNewsletter(botData.StartupNewsletter.NewsletterKey, chat => {
                                 botData.StartupNewsletter.Action(botData, chat, app.ApplicationServices);
                             });
-                            logger.LogInformation("Sending completed. Result: Successes: {TotalSuccesses} - " +
+                            logger?.LogInformation("Sending completed. Result: Successes: {TotalSuccesses} - " +
                                                   "Failures: {TotalErrors}", 
                                 result.TotalSuccesses, result.TotalErrors);
                         }

@@ -4,10 +4,10 @@ namespace Telegram.Bot.Advanced.DbContexts
 {
     public class Data {
         public long UserId { get; set; }
-        public string Key { get; set; }
+        public string Key { get; set; } = null!;
         public string? Value { get; set; }
         [JsonIgnore]
-        public TelegramChat Chat { get; set; }
+        public TelegramChat Chat { get; set; } = null!;
 
         public Data() { }
 
@@ -17,7 +17,7 @@ namespace Telegram.Bot.Advanced.DbContexts
             Value = value;
         }
 
-        public override bool Equals(object obj) {
+        public override bool Equals(object? obj) {
             if (obj is Data data) {
                 return UserId == data.UserId && Key == data.Key && Value == data.Value;
             }

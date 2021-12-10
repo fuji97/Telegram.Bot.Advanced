@@ -15,7 +15,7 @@ namespace Telegram.Bot.Advanced.Controller {
     /// </summary>
     /// <typeparam name="TContext">Telegram context used by the application</typeparam>
     public class TelegramController<TContext> : ITelegramController<TContext> where TContext : TelegramContext {
-        public MessageCommand? MessageCommand { get; set; } = null!;
+        public MessageCommand MessageCommand { get; set; } = null!;
         public TContext TelegramContext { get; set; } = null!;
         public TelegramChat? TelegramChat { get; set; } = null!;
         public ITelegramBotData BotData { get; set; } = null!;
@@ -44,7 +44,7 @@ namespace Telegram.Bot.Advanced.Controller {
             bool? allowSendingWithoutReply = null,
             IReplyMarkup? replyMarkup = null,
             CancellationToken cancellationToken = default (CancellationToken)) {
-            return await BotData.Bot.SendTextMessageAsync(TelegramChat.Id, text, mode, entities, disableWebPagePreview, disableNotification, 
+            return await BotData.Bot.SendTextMessageAsync(TelegramChat!.Id, text, mode, entities, disableWebPagePreview, disableNotification, 
                 replyToMessageId, allowSendingWithoutReply, replyMarkup, cancellationToken);
         }
 
@@ -65,7 +65,7 @@ namespace Telegram.Bot.Advanced.Controller {
             bool? allowSendingWithoutReply = null,
             IReplyMarkup? replyMarkup = null,
             CancellationToken cancellationToken = default (CancellationToken)) {
-            return await BotData.Bot.SendStickerAsync(TelegramChat.Id, sticker, disableNotification, replyToMessageId,
+            return await BotData.Bot.SendStickerAsync(TelegramChat!.Id, sticker, disableNotification, replyToMessageId,
                 allowSendingWithoutReply, replyMarkup, cancellationToken);
         }
 
@@ -92,7 +92,7 @@ namespace Telegram.Bot.Advanced.Controller {
             bool? allowSendingWithoutReply = null,
             IReplyMarkup? replyMarkup = null,
             CancellationToken cancellationToken = default (CancellationToken)) {
-            return await BotData.Bot.SendPhotoAsync(TelegramChat.Id, photo, caption, parseMode, captionEntities, disableNotification,
+            return await BotData.Bot.SendPhotoAsync(TelegramChat!.Id, photo, caption, parseMode, captionEntities, disableNotification,
                 replyToMessageId, allowSendingWithoutReply, replyMarkup, cancellationToken);
         }
     }

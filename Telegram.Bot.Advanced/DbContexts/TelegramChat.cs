@@ -27,7 +27,7 @@ namespace Telegram.Bot.Advanced.DbContexts
         public string? StickerSetName { get; set; }
         public bool? CanSetStickerSet { get; set; }
         public ICollection<Data> Data { get; set; } = new List<Data>();
-        public List<NewsletterChat> NewsletterChats { get; set; } = new();
+        public ICollection<NewsletterChat> NewsletterChats { get; set; } = new List<NewsletterChat>();
 
         public TelegramChat() {
         }
