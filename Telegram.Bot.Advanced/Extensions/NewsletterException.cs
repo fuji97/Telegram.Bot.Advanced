@@ -7,9 +7,9 @@ public class NewsletterException : Exception {
     public NewsletterException() {
     }
 
-    public NewsletterException([CanBeNull] string? message) : base(message) {
+    public NewsletterException(string? message) : base(message) {
     }
 
-    public NewsletterException([CanBeNull] string? message, [CanBeNull] Exception? innerException) : base(message, innerException) {
+    public NewsletterException(string? message, Exception? innerException) : base(message, innerException) {
     }
 }
