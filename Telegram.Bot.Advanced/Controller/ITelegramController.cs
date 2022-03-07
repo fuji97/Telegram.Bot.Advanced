@@ -22,7 +22,7 @@ namespace Telegram.Bot.Advanced.Controller {
         /// <summary>
         /// Instance of TelegramChat of the current chat, connected to TelegramContext
         /// </summary>
-        TelegramChat TelegramChat { set; }
+        TelegramChat? TelegramChat { set; }
         /// <summary>
         /// Data of the bot in use
         /// </summary>

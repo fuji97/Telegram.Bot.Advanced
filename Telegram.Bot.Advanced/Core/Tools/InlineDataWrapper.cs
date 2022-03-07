@@ -8,10 +8,10 @@ using Telegram.Bot.Exceptions;
 
 namespace Telegram.Bot.Advanced.Core.Tools {
     public class InlineDataWrapper {
-        public string Command { get; set; }
+        public string? Command { get; set; }
         public Dictionary<string, string> Data { get; set; }
 
-        public InlineDataWrapper(string command, Dictionary<string, string> data = null) {
+        public InlineDataWrapper(string? command, Dictionary<string, string>? data = null) {
             Command = command;
             Data = data ?? new Dictionary<string, string>();
         }
@@ -31,8 +31,8 @@ namespace Telegram.Bot.Advanced.Core.Tools {
         }
 
         public static InlineDataWrapper ParseInlineData(string inlineData) {
-            string command = null;
-            Dictionary<string, string> data = new Dictionary<string, string>();
+            string? command = null;
+            Dictionary<string, string>? data = new Dictionary<string, string>();
             var match = Regex.Match(inlineData, "^(.+)?&(.+)?$");
 
             if (match.Success) {
@@ -44,14 +44,14 @@ namespace Telegram.Bot.Advanced.Core.Tools {
                     var rawData = match.Groups[2].Value;
                     var query = HttpUtility.ParseQueryString(rawData);
 
-                    data = query.AllKeys.ToDictionary(k => k, k => query[k]);
+                    data = query.AllKeys.ToDictionary(k => k!, k => query[k]!);
                 }
             }
 
             return new InlineDataWrapper(command, data);
         }
 
-        public static string QuickParse(string command, Dictionary<string, string> data) {
+        public static string QuickParse(string command, Dictionary<string, string>? data) {
             return new InlineDataWrapper(command, data).ToString();
         }
     }

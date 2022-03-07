@@ -30,7 +30,7 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher
         where TContext : TelegramContext 
         where TController : class, ITelegramController<TContext> {
         
-        public Dispatcher(ITelegramBotData botData, IList<Type> controllers, ILogger<Dispatcher<TContext, TController>> logger = null) : base(botData, controllers, logger) {
+        public Dispatcher(ITelegramBotData botData, IList<Type> controllers, ILogger<Dispatcher<TContext, TController>>? logger = null) : base(botData, controllers, logger) {
             Controllers.Add(typeof(TController));
             
             var methodInfos = typeof(TController)
@@ -57,13 +57,13 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher
         where TContext : TelegramContext {
         
         protected Dictionary<MethodInfo, Type> Methods;
-        protected KeyValuePair<MethodInfo, Type> NoMethodsMethod;
-        protected ILogger Logger;
+        protected KeyValuePair<MethodInfo, Type>? NoMethodsMethod;
+        protected ILogger? Logger;
         protected readonly ITelegramBotData BotData;
         protected int LastUpdateId = -1;
         protected IList<Type> Controllers;
 
-        public Dispatcher(ITelegramBotData botData, IList<Type> controllers, ILogger<Dispatcher<TContext>> logger = null) {
+        public Dispatcher(ITelegramBotData botData, IList<Type> controllers, ILogger<Dispatcher<TContext>>? logger = null) {
             BotData = botData ?? throw new ArgumentNullException(nameof(botData), "botData cannot be null");
             Methods = new Dictionary<MethodInfo, Type>();
             Controllers = controllers ?? throw new ArgumentNullException(nameof(controllers), "controllers cannot be null");
@@ -97,7 +97,7 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher
 
         private static void SetControllerData(ITelegramController<TContext> controller, Update update, MessageCommand command,
             TContext context,
-            TelegramChat chat, ITelegramBotData botData) {
+            TelegramChat? chat, ITelegramBotData botData) {
             controller.Update = update;
             controller.MessageCommand = command;
             controller.TelegramContext = context;
@@ -117,6 +117,11 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher
             Logger = provider.GetService<ILogger<Dispatcher<TContext>>>();
         }
 
+        public Task HandleErrorAsync(Exception e, IServiceProvider provider) {
+            Logger?.LogError(e, "Telegram APIs raised an error");
+            return Task.CompletedTask;
+        }
+
         public virtual async Task DispatchUpdateAsync(Update update, IServiceProvider provider) {
             if (LastUpdateId != update.Id) {
                 LastUpdateId = update.Id;
@@ -125,7 +130,7 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher
                 }
             }
             else {
-                Logger.LogWarning("Duplicate update received - skipping");
+                Logger?.LogWarning("Duplicate update received - skipping");
             }
         }
 
@@ -137,13 +142,13 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher
 
         private async Task DispatchAsync(IServiceScope scope, Update update) {
             TContext context = scope.ServiceProvider.GetRequiredService<TContext>();
-            Logger.LogInformation($"Received update - ID: {update.Id}");
-            TelegramChat chat = await UpdateChat(update, context);
+            Logger?.LogInformation("Received update - ID: {Id}", update.Id);
+            TelegramChat? chat = await UpdateChat(update, context);
 
             // Ignore the update based on initial options
             MessageCommand command;
             if (update.Type == UpdateType.Message) {
-                var ignoreBehaviour = update.Message.Chat.IsGroup()
+                var ignoreBehaviour = update.Message!.Chat.IsGroup()
                     ? BotData.GroupChatBehaviour
                     : BotData.PrivateChatBehaviour;
                 command = new MessageCommand(update.Message);
@@ -181,13 +186,13 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher
             await context.SaveChangesAsync();
 
             Dictionary<MethodInfo, Type> eligibleControllers;
-            KeyValuePair<MethodInfo, Type> firstMethod;
+            KeyValuePair<MethodInfo, Type>? firstMethod;
 
             try {
                 eligibleControllers = FindEligibleControllers(update, chat, command);
             }
             catch (Exception e) {
-                Logger.LogError(e, "An exception was thrown while filtering the eligible controllers.");
+                Logger?.LogError(e, "An exception was thrown while filtering the eligible controllers");
                 throw;
             }
 
@@ -195,58 +200,57 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher
                 firstMethod = FindFirstMethod(eligibleControllers, update, chat, command);
             }
             catch (Exception e) {
-                Logger.LogError(e, "An exception was thrown while filtering the eligible methods.");
+                Logger?.LogError(e, "An exception was thrown while filtering the eligible methods");
                 throw;
             }
             
-            Logger.LogTrace($"Command: {JsonConvert.SerializeObject(command, Formatting.Indented)}");
-            Logger.LogTrace($"Chat: {JsonConvert.SerializeObject(chat, Formatting.Indented)}");
+            Logger?.LogTrace("Command: {Command}", JsonConvert.SerializeObject(command, Formatting.Indented));
+            Logger?.LogTrace("Chat: {Chat}", JsonConvert.SerializeObject(chat, Formatting.Indented));
 
             try {
                 await SetupAndExecute(scope, update, firstMethod, command, context, chat);
             }
             catch (Exception e) {
-                Logger.LogError(e, "An exception was thrown while dispatching the request.");
+                Logger?.LogError(e, "An exception was thrown while dispatching the request");
                 throw;
             }
 
-            Logger.LogTrace("End of dispatching");
+            Logger?.LogTrace("End of dispatching");
         }
 
-        private async Task SetupAndExecute(IServiceScope scope, Update update, KeyValuePair<MethodInfo, Type> firstMethod, MessageCommand command,
-            TContext context, TelegramChat chat) {
-            if (firstMethod.Key != null) {
-                ITelegramController<TContext> controller =
-                    (ITelegramController<TContext>) scope.ServiceProvider.GetRequiredService(firstMethod.Value);
+        private async Task SetupAndExecute(IServiceScope scope, Update update, KeyValuePair<MethodInfo, Type>? firstMethod, MessageCommand command,
+            TContext context, TelegramChat? chat) {
+            if (firstMethod.HasValue) {
+                var method = firstMethod.Value; 
+                var controller = (ITelegramController<TContext>) scope.ServiceProvider.GetRequiredService(method.Value);
 
                 SetControllerData(controller, update, command, context, chat, BotData);
-                await ExecuteMethod(firstMethod.Value, firstMethod.Key, controller);
+                await ExecuteMethod(method.Value, method.Key, controller);
             }
-            else if (NoMethodsMethod.Key != null) {
-                ITelegramController<TContext> controller =
-                    (TelegramController<TContext>) scope.ServiceProvider.GetRequiredService(NoMethodsMethod.Value);
+            else if (NoMethodsMethod.HasValue) {
+                var method = NoMethodsMethod.Value;
+                var controller = (TelegramController<TContext>) scope.ServiceProvider.GetRequiredService(method.Value);
 
                 SetControllerData(controller, update, command, context, chat, BotData);
-                await ExecuteMethod(NoMethodsMethod.Value, NoMethodsMethod.Key, controller);
+                await ExecuteMethod(method.Value, method.Key, controller);
             }
             else {
-                Logger.LogInformation("No valid method found to handle the current request.");
+                Logger?.LogInformation("No valid method found to handle the current request");
             }
         }
         
         private async Task ExecuteMethod(Type controllerType, MethodInfo handler, ITelegramController<TContext> controller) {
             if (handler.GetCustomAttribute<AsyncStateMachineAttribute>() != null) {
-                Logger.LogInformation($"Calling async method: {handler.Name}");
-                // ReSharper disable once PossibleNullReferenceException
-                await (Task) handler.Invoke(Convert.ChangeType(controller, controllerType), null);
+                Logger?.LogInformation("Calling async method: {Name}", handler.Name);
+                await (Task) handler.Invoke(Convert.ChangeType(controller, controllerType), null)!;
             }
             else {
-                Logger.LogInformation($"Calling sync method: {handler.Name}");
+                Logger?.LogInformation("Calling sync method: {Name}", handler.Name);
                 handler.Invoke(controller, null);
             }
         }
 
-        private Dictionary<MethodInfo, Type> FindEligibleControllers(Update update, TelegramChat chat,
+        private Dictionary<MethodInfo, Type> FindEligibleControllers(Update update, TelegramChat? chat,
             MessageCommand command) {
             var eligibleControllers = Methods.Where(m => 
                     m.Value.GetCustomAttributes<DispatcherFilterAttribute>()
@@ -256,18 +260,18 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher
             return eligibleControllers;
         }
 
-        private KeyValuePair<MethodInfo, Type> FindFirstMethod(Dictionary<MethodInfo, Type> methods, Update update, TelegramChat chat, MessageCommand command) {
-            var firstMethod = methods.FirstOrDefault(m => 
+        private KeyValuePair<MethodInfo, Type>? FindFirstMethod(Dictionary<MethodInfo, Type> methods, Update update, TelegramChat? chat, MessageCommand command) {
+            KeyValuePair<MethodInfo, Type>? firstMethod = methods.FirstOrDefault(m => 
                 m.Key.GetCustomAttributes<DispatcherFilterAttribute>()
                 .All(attr => attr.IsValid(update, chat, command, BotData)));
             return firstMethod;
         }
 
-        private async Task<TelegramChat> UpdateChat(Update update, TContext context, TelegramChat chat = null) {
+        private async Task<TelegramChat?> UpdateChat(Update update, TContext context, TelegramChat? chat = null) {
             if (update.GetMessage()?.Chat == null) 
                 return chat;
             
-            var newChat = update.GetMessage().Chat;
+            var newChat = update.GetMessage()!.Chat;
             chat ??= await TelegramChat.GetAsync(context, newChat.Id);
 
             if (chat != null) {
@@ -281,7 +285,7 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher
                 if (newChat.CanSetStickerSet != null) chat.CanSetStickerSet = newChat.CanSetStickerSet;
             }
             else {
-                chat = new TelegramChat(update.Message.Chat);
+                chat = new TelegramChat(newChat);
                     
                 // Check if the chat has a default role and set it, if any
                 var defaultRole = BotData.DefaultUserRole.FirstOrDefault(d => d.Equals(chat));
@@ -295,18 +299,18 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher
             return chat;
         }
 
-        private async Task UpdateUser(Update update, TContext context, TelegramChat currentChat) {
+        private async Task UpdateUser(Update update, TContext context, TelegramChat? currentChat) {
             var updateUser = update.GetMessage()?.From;
 
-            if (updateUser?.Id == currentChat.Id) {
+            if (updateUser?.Id == currentChat?.Id) {
                 return;
             }
             
             if (updateUser != null) {
                 var storedUser = await context.Users.FirstOrDefaultAsync(u => u.Id == updateUser.Id);
                 if (storedUser != null) {
+                    storedUser.FirstName = updateUser.FirstName;
                     if (updateUser.Username != null) storedUser.Username = updateUser.Username;
-                    if (updateUser.FirstName != null) storedUser.FirstName = updateUser.FirstName;
                     if (updateUser.LastName != null) storedUser.LastName = updateUser.LastName;
                 }
                 else {

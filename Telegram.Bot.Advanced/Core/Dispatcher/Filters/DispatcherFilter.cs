@@ -19,7 +19,7 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher.Filters
         /// <param name="command">MessageCommand generated from current Update</param>
         /// <param name="botData">Data of the bot in use</param>
         /// <returns>If true, the mehod is eligible for the currrent update. If false, the method is discarded</returns>
-        public abstract bool IsValid(Update update, TelegramChat chat, MessageCommand command, ITelegramBotData botData);
+        public abstract bool IsValid(Update update, TelegramChat? chat, MessageCommand command, ITelegramBotData botData);
 
         /// <summary>
         /// Called when searching for eligible handler controller, return true if the controller is eligible.
@@ -30,7 +30,7 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher.Filters
         /// <param name="command">MessageCommand generated from current Update</param>
         /// <param name="botData">Data of the bot in use</param>
         /// <returns>If true, the controller is eligible for the current update. If false, the method is discarded</returns>
-        public virtual bool IsValidController(Update update, TelegramChat chat, MessageCommand command,
+        public virtual bool IsValidController(Update update, TelegramChat? chat, MessageCommand command,
             ITelegramBotData botData) {
             return IsValid(update, chat, command, botData);
         }
@@ -44,7 +44,7 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher.Filters
         /// <param name="command">MessageCommand generated from current Update</param>
         /// <param name="botData">Data of the bot in use</param>
         /// <returns>If true, the method is eligible for the current update. If false, the method is discarded</returns>
-        public virtual bool IsValidMethod(Update update, TelegramChat chat, MessageCommand command,
+        public virtual bool IsValidMethod(Update update, TelegramChat? chat, MessageCommand command,
             ITelegramBotData botData) {
             return IsValid(update, chat, command, botData);
         }

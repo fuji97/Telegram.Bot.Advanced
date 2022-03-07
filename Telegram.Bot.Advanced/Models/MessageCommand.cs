@@ -5,11 +5,11 @@ using Telegram.Bot.Types;
 
 namespace Telegram.Bot.Advanced.Models {
     public class MessageCommand {
-        public string Command { get; set; }
-        public string Target { get; set; }
+        public string? Command { get; set; }
+        public string? Target { get; set; }
         public List<string> Parameters { get; set; } = new List<string>();
-        public string Text { get; set; }
-        public string Message { get; set;}
+        public string? Text { get; set; }
+        public string? Message { get; set;}
 
         public bool IsCommand() {
             return Command != null; 

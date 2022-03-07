@@ -3,7 +3,7 @@ using Telegram.Bot.Advanced.DbContexts;
 namespace Telegram.Bot.Advanced.Models {
     public class UserRole {
         public long UserId { get; set; }
-        public string Username { get; set; }
+        public string? Username { get; set; }
         public SelectUserBy SelectUserBy { get; set; }
         public ChatRole Role { get; set; }
 
@@ -13,13 +13,17 @@ namespace Telegram.Bot.Advanced.Models {
             Role = role;
         }
         
-        public UserRole(string username, ChatRole role) {
+        public UserRole(string? username, ChatRole role) {
             Username = username;
             SelectUserBy = SelectUserBy.Username;
             Role = role;
         }
 
-        public bool Equals(TelegramChat chat) {
+        public bool Equals(TelegramChat? chat) {
+            if (chat == null) {
+                return false;
+            }
+            
             switch (SelectUserBy) {
                 case SelectUserBy.Username:
                     return Username == chat.Username;

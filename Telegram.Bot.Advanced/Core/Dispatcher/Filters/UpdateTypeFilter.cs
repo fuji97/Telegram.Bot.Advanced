@@ -13,7 +13,7 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher.Filters {
             _type = type;
         }
         
-        public override bool IsValid(Update update, TelegramChat chat, MessageCommand command, ITelegramBotData botData) {
+        public override bool IsValid(Update update, TelegramChat? chat, MessageCommand command, ITelegramBotData botData) {
             return _type.Any(x => x == update.Type);
         }
     }

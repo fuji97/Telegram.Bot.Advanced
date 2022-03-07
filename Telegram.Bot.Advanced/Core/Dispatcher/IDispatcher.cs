@@ -40,5 +40,13 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher {
         /// </summary>
         /// <param name="provider">Provider used to get dependencies</param>
         void SetServices(IServiceProvider provider);
+
+        /// <summary>
+        /// Called when an error is raised by the Telegram API
+        /// </summary>
+        /// <param name="e">Raised exception</param>
+        /// <param name="provider">Provider used to get dependencies</param>
+        /// <returns></returns>
+        Task HandleErrorAsync(Exception e, IServiceProvider provider);
     }
 }

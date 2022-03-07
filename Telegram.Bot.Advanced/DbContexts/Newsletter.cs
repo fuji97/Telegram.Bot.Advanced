@@ -13,10 +13,11 @@ namespace Telegram.Bot.Advanced.DbContexts {
         }
 
         [Key]
-        public string Key { get; set; }
-        public string Description { get; set; }
-        
+        public string Key { get; set; } = null!;
+
+        public string Description { get; set; } = null!;
+
         [JsonIgnore]
-        public List<NewsletterChat> NewsletterChats { get; set; }
+        public List<NewsletterChat> NewsletterChats { get; set; } = new();
     }
 }

@@ -14,12 +14,12 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher.Filters {
             this._commands = commands;
         }
 
-        public override bool IsValid(Update update, TelegramChat chat, MessageCommand command, ITelegramBotData botData) {
+        public override bool IsValid(Update update, TelegramChat? chat, MessageCommand command, ITelegramBotData botData) {
             if (update.Type != UpdateType.CallbackQuery) {
                 return false;
             }
 
-            var data = InlineDataWrapper.ParseInlineData(update.CallbackQuery.Data);
+            var data = InlineDataWrapper.ParseInlineData(update.CallbackQuery!.Data!);
             return _commands.Contains(data.Command);
         }
     }

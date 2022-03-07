@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.Exceptions;
+using Telegram.Bot.Advanced.Extensions;
 using Telegram.Bot.Advanced.Models;
 using Telegram.Bot.Exceptions;
 
@@ -27,17 +28,17 @@ namespace Telegram.Bot.Advanced.Services {
                 .Select(nc => nc.Chat);
         }
         
-        private async Task<Newsletter> GetNewsletter(string newsletterKey) {
+        private async Task<Newsletter?> GetNewsletter(string newsletterKey) {
             var newsletter = await _context.Newsletters.FindAsync(newsletterKey);
             if (newsletter == null)
-                throw new InvalidParameterException(nameof(newsletterKey), $"The newsletter {newsletter} doesn't exists");
+                throw new NewsletterException($"The newsletter {newsletter} doesn't exists");
             return newsletter;
         }
         
         private async Task<TelegramChat> GetTelegramChat(long chatId) {
             var chat = await _context.Users.FindAsync(chatId);
             if (chat == null)
-                throw new InvalidParameterException(nameof(chatId), $"The chat {chat} doesn't exists");
+                throw new NewsletterException($"The chat {chat} doesn't exists");
             return chat;
         }
 
@@ -130,7 +131,7 @@ namespace Telegram.Bot.Advanced.Services {
 
             if (!await _context.NewsletterChats
                 .AnyAsync(nc => nc.NewsletterKey == newsletterKey && nc.ChatId == chatId)) {
-                await _context.AddAsync(new NewsletterChat(newsletter, chat));
+                await _context.AddAsync(new NewsletterChat(newsletter!, chat));
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -145,7 +146,7 @@ namespace Telegram.Bot.Advanced.Services {
 
             if (!_context.NewsletterChats
                 .Any(nc => nc.NewsletterKey == newsletterKey && nc.ChatId == chatId)) {
-                _context.Add(new NewsletterChat(newsletter, chat));
+                _context.Add(new NewsletterChat(newsletter!, chat));
                 _context.SaveChanges();
                 return true;
             }
@@ -199,12 +200,12 @@ namespace Telegram.Bot.Advanced.Services {
                 .Any(nc => nc.NewsletterKey == newsletterKey && nc.ChatId == chatId);
         }
 
-        public async Task<Newsletter> GetNewsletterByKeyAsync(string newsletterKey) {
+        public async Task<Newsletter?> GetNewsletterByKeyAsync(string newsletterKey) {
             return await _context.Newsletters
                 .FirstOrDefaultAsync(n => n.Key == newsletterKey);
         }
 
-        public Newsletter GetNewsletterByKey(string newsletterKey) {
+        public Newsletter? GetNewsletterByKey(string newsletterKey) {
             return _context.Newsletters
                 .FirstOrDefault(n => n.Key == newsletterKey);
         }

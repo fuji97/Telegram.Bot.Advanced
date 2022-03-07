@@ -34,9 +34,9 @@ namespace Telegram.Bot.Advanced.DbContexts
         }
 
         // Entities
-        public DbSet<TelegramChat> Users { get; set; }
-        public DbSet<Data> Data { get; set; }
-        public DbSet<Newsletter> Newsletters { get; set; }
-        public DbSet<NewsletterChat> NewsletterChats { get; set; }
+        public DbSet<TelegramChat> Users => Set<TelegramChat>();
+        public DbSet<Data> Data => Set<Data>();
+        public DbSet<Newsletter> Newsletters => Set<Newsletter>();
+        public DbSet<NewsletterChat> NewsletterChats => Set<NewsletterChat>();
     }
 }

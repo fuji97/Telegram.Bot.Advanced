@@ -8,11 +8,11 @@ namespace Telegram.Bot.Advanced.Core.Holder {
         ITelegramBotClient Bot { get; }
         IDispatcher Dispatcher { get; }
         string BasePath { get; }
-        string Username { get; set; }
+        string? Username { get; set; }
         UserUpdate UserUpdate { get; set; }
         IgnoreBehaviour GroupChatBehaviour { get; set; }
         IgnoreBehaviour PrivateChatBehaviour { get; set; }
         IList<UserRole> DefaultUserRole { get; set; }
-        public StartupNewsletter StartupNewsletter { get; set; }
+        public StartupNewsletter? StartupNewsletter { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot.Advanced.Core.Holder;
 using Telegram.Bot.Advanced.DbContexts;
@@ -14,33 +15,37 @@ namespace Telegram.Bot.Advanced.Controller {
     /// </summary>
     /// <typeparam name="TContext">Telegram context used by the application</typeparam>
     public class TelegramController<TContext> : ITelegramController<TContext> where TContext : TelegramContext {
-        public MessageCommand MessageCommand { get; set; }
-        public TContext TelegramContext { get; set; }
-        public TelegramChat TelegramChat { get; set; }
-        public ITelegramBotData BotData { get; set; }
-        public Update Update { get; set; }
+        public MessageCommand MessageCommand { get; set; } = null!;
+        public TContext TelegramContext { get; set; } = null!;
+        public TelegramChat? TelegramChat { get; set; } = null!;
+        public ITelegramBotData BotData { get; set; } = null!;
+        public Update Update { get; set; } = null!;
 
         /// <summary>
         /// Shortcut to send a message to current chat
         /// </summary>
         /// <param name="text"></param>
         /// <param name="mode"></param>
+        /// <param name="entities"></param>
         /// <param name="disableWebPagePreview"></param>
         /// <param name="disableNotification"></param>
         /// <param name="replyToMessageId"></param>
+        /// <param name="allowSendingWithoutReply"></param>
         /// <param name="replyMarkup"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <see cref="Telegram.Bot.TelegramBotClient.SendTextMessageAsync"/>
         protected async Task<Message> ReplyTextMessageAsync(string text, 
-            ParseMode mode = ParseMode.Default, 
-            bool disableWebPagePreview = false,
-            bool disableNotification = false,
-            int replyToMessageId = 0,
-            IReplyMarkup replyMarkup = null,
+            ParseMode? mode = null,
+            IEnumerable<MessageEntity>? entities = null,
+            bool? disableWebPagePreview = null,
+            bool? disableNotification = null,
+            int? replyToMessageId = null,
+            bool? allowSendingWithoutReply = null,
+            IReplyMarkup? replyMarkup = null,
             CancellationToken cancellationToken = default (CancellationToken)) {
-            return await BotData.Bot.SendTextMessageAsync(TelegramChat.Id, text, mode, null, disableWebPagePreview, disableNotification, 
-                replyToMessageId, true, replyMarkup, cancellationToken);
+            return await BotData.Bot.SendTextMessageAsync(TelegramChat!.Id, text, mode, entities, disableWebPagePreview, disableNotification, 
+                replyToMessageId, allowSendingWithoutReply, replyMarkup, cancellationToken);
         }
 
         /// <summary>
@@ -49,17 +54,19 @@ namespace Telegram.Bot.Advanced.Controller {
         /// <param name="sticker"></param>
         /// <param name="disableNotification"></param>
         /// <param name="replyToMessageId"></param>
+        /// <param name="allowSendingWithoutReply"></param>
         /// <param name="replyMarkup"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <see cref="Telegram.Bot.TelegramBotClient.SendStickerAsync"/>
         protected async Task<Message> ReplyStickerAsync(InputOnlineFile sticker,
-            bool disableNotification = false,
-            int replyToMessageId = 0,
-            IReplyMarkup replyMarkup = null,
+            bool? disableNotification = null,
+            int? replyToMessageId = null,
+            bool? allowSendingWithoutReply = null,
+            IReplyMarkup? replyMarkup = null,
             CancellationToken cancellationToken = default (CancellationToken)) {
-            return await BotData.Bot.SendStickerAsync(TelegramChat.Id, sticker, disableNotification, replyToMessageId,
-                true, replyMarkup, cancellationToken);
+            return await BotData.Bot.SendStickerAsync(TelegramChat!.Id, sticker, disableNotification, replyToMessageId,
+                allowSendingWithoutReply, replyMarkup, cancellationToken);
         }
 
         /// <summary>
@@ -68,21 +75,25 @@ namespace Telegram.Bot.Advanced.Controller {
         /// <param name="photo"></param>
         /// <param name="caption"></param>
         /// <param name="parseMode"></param>
+        /// <param name="captionEntities"></param>
         /// <param name="disableNotification"></param>
         /// <param name="replyToMessageId"></param>
+        /// <param name="allowSendingWithoutReply"></param>
         /// <param name="replyMarkup"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <see cref="Telegram.Bot.TelegramBotClient.SendPhotoAsync"/>
         protected async Task<Message> ReplyPhotoAsync(InputOnlineFile photo,
-            string caption = null,
-            ParseMode parseMode = ParseMode.Default,
-            bool disableNotification = false,
-            int replyToMessageId = 0,
-            IReplyMarkup replyMarkup = null,
+            string? caption = null,
+            ParseMode? parseMode = null,
+            IEnumerable<MessageEntity>? captionEntities = null,
+            bool? disableNotification = null,
+            int? replyToMessageId = null,
+            bool? allowSendingWithoutReply = null,
+            IReplyMarkup? replyMarkup = null,
             CancellationToken cancellationToken = default (CancellationToken)) {
-            return await BotData.Bot.SendPhotoAsync(TelegramChat.Id, photo, caption, parseMode, null, disableNotification,
-                replyToMessageId, true, replyMarkup, cancellationToken);
+            return await BotData.Bot.SendPhotoAsync(TelegramChat!.Id, photo, caption, parseMode, captionEntities, disableNotification,
+                replyToMessageId, allowSendingWithoutReply, replyMarkup, cancellationToken);
         }
     }
 }

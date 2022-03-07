@@ -32,7 +32,7 @@ namespace Telegram.Bot.Advanced.Core.Middlewares {
                 // Avoid multiple dispatching of the same update in case of delays
                 if (_lastUpdateId.GetValueOrDefault(-1) != update.Id) {
                     var botData = holder.Get(_endpoint);
-                    if (botData != null) {
+                    if (botData is not null) {
                         await botData.Dispatcher.DispatchUpdateAsync(update, provider);
                     }
                     else {
