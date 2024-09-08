@@ -14,10 +14,11 @@
     <PackageTags>Telegram Bot Api</PackageTags>
     <PackageLicenseFile>license.txt</PackageLicenseFile>
     <LangVersion>default</LangVersion>
-    <PackageVersion>8.0.0-beta</PackageVersion>
+    <PackageVersion>8.0.0-alpha</PackageVersion>
     <Title>Telegram.Bot.Advanced</Title>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Flurl" Version="4.0.0" />
@@ -29,6 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="license\license.txt" Pack="true" PackagePath="" />
+    <None Include="icon.png" Pack="true" PackagePath="" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Test.xsd">
