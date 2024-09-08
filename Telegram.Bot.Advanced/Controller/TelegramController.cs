@@ -6,94 +6,120 @@ using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.Models;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace Telegram.Bot.Advanced.Controller {
+namespace Telegram.Bot.Advanced.Controller;
+
+/// <summary>
+/// Base implementation of ITelegramContext
+/// </summary>
+/// <typeparam name="TContext">Telegram context used by the application</typeparam>
+public class TelegramController<TContext> : ITelegramController<TContext> where TContext : TelegramContext {
+    public MessageCommand MessageCommand { get; set; } = null!;
+    public TContext TelegramContext { get; set; } = null!;
+    public TelegramChat? TelegramChat { get; set; } = null!;
+    public ITelegramBotData BotData { get; set; } = null!;
+    public Update Update { get; set; } = null!;
+
     /// <summary>
-    /// Base implementation of ITelegramContext
+    /// Shortcut to send a message to current chat
     /// </summary>
-    /// <typeparam name="TContext">Telegram context used by the application</typeparam>
-    public class TelegramController<TContext> : ITelegramController<TContext> where TContext : TelegramContext {
-        public MessageCommand MessageCommand { get; set; } = null!;
-        public TContext TelegramContext { get; set; } = null!;
-        public TelegramChat? TelegramChat { get; set; } = null!;
-        public ITelegramBotData BotData { get; set; } = null!;
-        public Update Update { get; set; } = null!;
+    /// <param name="text"></param>
+    /// <param name="parseMode"></param>
+    /// <param name="entities"></param>
+    /// <param name="linkPreviewOptions"></param>
+    /// <param name="disableNotification"></param>
+    /// <param name="protectContent"></param>
+    /// <param name="messageEffectId"></param>
+    /// <param name="replyParameters"></param>
+    /// <param name="replyMarkup"></param>
+    /// <param name="businessConnectionId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <param name="messageThreadId"></param>
+    /// <returns></returns>
+    /// <see cref="Telegram.Bot.TelegramBotClient.SendTextMessageAsync"/>
+    protected async Task<Message> ReplyTextMessageAsync(string text, 
+        int? messageThreadId = null, 
+        ParseMode parseMode = ParseMode.None, 
+        IEnumerable<MessageEntity>? entities = null, 
+        LinkPreviewOptions? linkPreviewOptions = null, 
+        bool disableNotification = false, 
+        bool protectContent = false, 
+        string? messageEffectId = null, 
+        ReplyParameters? replyParameters = null, 
+        IReplyMarkup? replyMarkup = null, 
+        string? businessConnectionId = null,
+        CancellationToken cancellationToken = default (CancellationToken)) {
+        return await BotData.Bot.SendTextMessageAsync(TelegramChat!.Id, text, messageThreadId, parseMode, entities,
+            linkPreviewOptions, disableNotification, protectContent, messageEffectId, replyParameters, replyMarkup,
+            businessConnectionId, cancellationToken);
+    }
 
-        /// <summary>
-        /// Shortcut to send a message to current chat
-        /// </summary>
-        /// <param name="text"></param>
-        /// <param name="mode"></param>
-        /// <param name="entities"></param>
-        /// <param name="disableWebPagePreview"></param>
-        /// <param name="disableNotification"></param>
-        /// <param name="replyToMessageId"></param>
-        /// <param name="allowSendingWithoutReply"></param>
-        /// <param name="replyMarkup"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        /// <see cref="Telegram.Bot.TelegramBotClient.SendTextMessageAsync"/>
-        protected async Task<Message> ReplyTextMessageAsync(string text, 
-            ParseMode? mode = null,
-            IEnumerable<MessageEntity>? entities = null,
-            bool? disableWebPagePreview = null,
-            bool? disableNotification = null,
-            int? replyToMessageId = null,
-            bool? allowSendingWithoutReply = null,
-            IReplyMarkup? replyMarkup = null,
-            CancellationToken cancellationToken = default (CancellationToken)) {
-            return await BotData.Bot.SendTextMessageAsync(TelegramChat!.Id, text, mode, entities, disableWebPagePreview, disableNotification, 
-                replyToMessageId, allowSendingWithoutReply, replyMarkup, cancellationToken);
-        }
+    /// <summary>
+    /// Shortcut to send a sticker to current chat
+    /// </summary>
+    /// <param name="sticker"></param>
+    /// <param name="emoji"></param>
+    /// <param name="disableNotification"></param>
+    /// <param name="replyParameters"></param>
+    /// <param name="replyMarkup"></param>
+    /// <param name="businessConnectionId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <param name="messageThreadId"></param>
+    /// <param name="protectContent"></param>
+    /// <param name="messageEffectId"></param>
+    /// <returns></returns>
+    /// <see cref="Telegram.Bot.TelegramBotClient.SendStickerAsync"/>
+    protected async Task<Message> ReplyStickerAsync(InputFile sticker, 
+        int? messageThreadId = null, 
+        string? emoji = null, 
+        bool disableNotification = false, 
+        bool protectContent = false, 
+        string? messageEffectId = null, 
+        ReplyParameters? replyParameters = null, 
+        IReplyMarkup? replyMarkup = null, 
+        string? businessConnectionId = null,
+        CancellationToken cancellationToken = default (CancellationToken)) {
+        return await BotData.Bot.SendStickerAsync(TelegramChat!.Id, sticker, messageThreadId, emoji,
+            disableNotification, protectContent, messageEffectId, replyParameters, replyMarkup,
+            businessConnectionId, cancellationToken);
+    }
 
-        /// <summary>
-        /// Shortcut to send a sticker to current chat
-        /// </summary>
-        /// <param name="sticker"></param>
-        /// <param name="disableNotification"></param>
-        /// <param name="replyToMessageId"></param>
-        /// <param name="allowSendingWithoutReply"></param>
-        /// <param name="replyMarkup"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        /// <see cref="Telegram.Bot.TelegramBotClient.SendStickerAsync"/>
-        protected async Task<Message> ReplyStickerAsync(InputOnlineFile sticker,
-            bool? disableNotification = null,
-            int? replyToMessageId = null,
-            bool? allowSendingWithoutReply = null,
-            IReplyMarkup? replyMarkup = null,
-            CancellationToken cancellationToken = default (CancellationToken)) {
-            return await BotData.Bot.SendStickerAsync(TelegramChat!.Id, sticker, disableNotification, replyToMessageId,
-                allowSendingWithoutReply, replyMarkup, cancellationToken);
-        }
-
-        /// <summary>
-        /// Shortcut to send a photo to current chat
-        /// </summary>
-        /// <param name="photo"></param>
-        /// <param name="caption"></param>
-        /// <param name="parseMode"></param>
-        /// <param name="captionEntities"></param>
-        /// <param name="disableNotification"></param>
-        /// <param name="replyToMessageId"></param>
-        /// <param name="allowSendingWithoutReply"></param>
-        /// <param name="replyMarkup"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        /// <see cref="Telegram.Bot.TelegramBotClient.SendPhotoAsync"/>
-        protected async Task<Message> ReplyPhotoAsync(InputOnlineFile photo,
-            string? caption = null,
-            ParseMode? parseMode = null,
-            IEnumerable<MessageEntity>? captionEntities = null,
-            bool? disableNotification = null,
-            int? replyToMessageId = null,
-            bool? allowSendingWithoutReply = null,
-            IReplyMarkup? replyMarkup = null,
-            CancellationToken cancellationToken = default (CancellationToken)) {
-            return await BotData.Bot.SendPhotoAsync(TelegramChat!.Id, photo, caption, parseMode, captionEntities, disableNotification,
-                replyToMessageId, allowSendingWithoutReply, replyMarkup, cancellationToken);
-        }
+    /// <summary>
+    /// Shortcut to send a photo to current chat
+    /// </summary>
+    /// <param name="photo"></param>
+    /// <param name="messageThreadId"></param>
+    /// <param name="caption"></param>
+    /// <param name="parseMode"></param>
+    /// <param name="captionEntities"></param>
+    /// <param name="hasSpoiler"></param>
+    /// <param name="disableNotification"></param>
+    /// <param name="replyParameters"></param>
+    /// <param name="replyMarkup"></param>
+    /// <param name="businessConnectionId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <param name="showCaptionAboveMedia"></param>
+    /// <param name="protectContent"></param>
+    /// <param name="messageEffectId"></param>
+    /// <returns></returns>
+    /// <see cref="Telegram.Bot.TelegramBotClient.SendPhotoAsync"/>
+    protected async Task<Message> ReplyPhotoAsync(InputFile photo, 
+        int? messageThreadId = null, 
+        string? caption = null, 
+        ParseMode parseMode = ParseMode.None, 
+        IEnumerable<MessageEntity>? captionEntities = null, 
+        bool showCaptionAboveMedia = false, 
+        bool hasSpoiler = false, 
+        bool disableNotification = false, 
+        bool protectContent = false, 
+        string? messageEffectId = null, 
+        ReplyParameters? replyParameters = null, 
+        IReplyMarkup? replyMarkup = null, 
+        string? businessConnectionId = null,
+        CancellationToken cancellationToken = default (CancellationToken)) {
+        return await BotData.Bot.SendPhotoAsync(TelegramChat!.Id, photo, messageThreadId, caption, parseMode,
+            captionEntities, showCaptionAboveMedia, hasSpoiler, disableNotification, protectContent,
+            messageEffectId, replyParameters, replyMarkup, businessConnectionId, cancellationToken);
     }
 }

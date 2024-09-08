@@ -6,21 +6,21 @@ using Telegram.Bot.Advanced.Models;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
-namespace Telegram.Bot.Advanced.Core.Dispatcher.Filters {
-    public class CallbackCommandFilter : DispatcherFilterAttribute {
-        private readonly string[] _commands;
+namespace Telegram.Bot.Advanced.Core.Dispatcher.Filters;
 
-        public CallbackCommandFilter(params string[] commands) {
-            this._commands = commands;
+public class CallbackCommandFilter : DispatcherFilterAttribute {
+    private readonly string[] _commands;
+
+    public CallbackCommandFilter(params string[] commands) {
+        this._commands = commands;
+    }
+
+    public override bool IsValid(Update update, TelegramChat? chat, MessageCommand command, ITelegramBotData botData) {
+        if (update.Type != UpdateType.CallbackQuery) {
+            return false;
         }
 
-        public override bool IsValid(Update update, TelegramChat? chat, MessageCommand command, ITelegramBotData botData) {
-            if (update.Type != UpdateType.CallbackQuery) {
-                return false;
-            }
-
-            var data = InlineDataWrapper.ParseInlineData(update.CallbackQuery!.Data!);
-            return _commands.Contains(data.Command);
-        }
+        var data = InlineDataWrapper.ParseInlineData(update.CallbackQuery!.Data!);
+        return _commands.Contains(data.Command);
     }
 }

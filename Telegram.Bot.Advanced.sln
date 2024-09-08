@@ -1,11 +1,11 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27428.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Telegram.Bot.Advanced", "Telegram.Bot.Advanced\Telegram.Bot.Advanced.csproj", "{B53A96EB-DF09-4EF1-B72C-407F0B9D75EF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Telegram.Bot.Advanced.TestServer", "Telegram.Bot.Advanced.TestServer\Telegram.Bot.Advanced.TestServer.csproj", "{5001F812-7353-4A77-889A-CCD198FE2A25}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Telegram.Bot.Advanced.TestServer", "Telegram.Bot.Advanced.TestServer\Telegram.Bot.Advanced.TestServer.csproj", "{5001F812-7353-4A77-889A-CCD198FE2A25}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

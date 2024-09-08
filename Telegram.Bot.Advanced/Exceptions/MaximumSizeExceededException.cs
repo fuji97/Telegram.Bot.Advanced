@@ -1,18 +1,18 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Telegram.Bot.Advanced.Exceptions {
-    public class MaximumSizeExceededException : Exception {
-        public MaximumSizeExceededException() {
-        }
+namespace Telegram.Bot.Advanced.Exceptions;
 
-        protected MaximumSizeExceededException(SerializationInfo info, StreamingContext context) : base(info, context) {
-        }
+public class MaximumSizeExceededException : Exception {
+    public MaximumSizeExceededException() {
+    }
 
-        public MaximumSizeExceededException(string message) : base(message) {
-        }
+    protected MaximumSizeExceededException(SerializationInfo info, StreamingContext context) : base(info, context) {
+    }
 
-        public MaximumSizeExceededException(string message, Exception innerException) : base(message, innerException) {
-        }
+    public MaximumSizeExceededException(string message) : base(message) {
+    }
+
+    public MaximumSizeExceededException(string message, Exception innerException) : base(message, innerException) {
     }
 }

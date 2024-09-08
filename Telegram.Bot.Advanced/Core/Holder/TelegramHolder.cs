@@ -2,27 +2,27 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Telegram.Bot.Advanced.Core.Holder {
-    public class TelegramHolder : ITelegramHolder {
-        private Dictionary<string, ITelegramBotData> Bots { get; }
+namespace Telegram.Bot.Advanced.Core.Holder;
 
-        public TelegramHolder(IEnumerable<ITelegramBotData> bots) {
-            Bots = new Dictionary<string, ITelegramBotData>();
-            foreach (var bot in bots) {
-                Bots[bot.Endpoint] = bot;
-            }
-        }
+public class TelegramHolder : ITelegramHolder {
+    private Dictionary<string, ITelegramBotData> Bots { get; }
 
-        public ITelegramBotData Get(string key) {
-            return Bots[key];
+    public TelegramHolder(IEnumerable<ITelegramBotData> bots) {
+        Bots = new Dictionary<string, ITelegramBotData>();
+        foreach (var bot in bots) {
+            Bots[bot.Endpoint] = bot;
         }
+    }
 
-        public IEnumerator<ITelegramBotData> GetEnumerator() {
-            return Bots.Select(pair => pair.Value).GetEnumerator();
-        }
+    public ITelegramBotData Get(string key) {
+        return Bots[key];
+    }
 
-        IEnumerator IEnumerable.GetEnumerator() {
-            return GetEnumerator();
-        }
+    public IEnumerator<ITelegramBotData> GetEnumerator() {
+        return Bots.Select(pair => pair.Value).GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() {
+        return GetEnumerator();
     }
 }
