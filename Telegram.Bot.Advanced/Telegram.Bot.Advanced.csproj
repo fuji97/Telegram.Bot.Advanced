@@ -14,7 +14,7 @@
     <PackageTags>Telegram Bot Api</PackageTags>
     <PackageLicenseFile>license.txt</PackageLicenseFile>
     <LangVersion>default</LangVersion>
-    <PackageVersion>8.0.0-alpha</PackageVersion>
+    <PackageVersion>8.0.1-alpha</PackageVersion>
     <Title>Telegram.Bot.Advanced</Title>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
