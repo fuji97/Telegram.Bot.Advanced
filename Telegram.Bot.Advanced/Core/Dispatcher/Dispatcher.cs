@@ -279,7 +279,8 @@ public class Dispatcher<TContext> : IDisposable, IDispatcher
             if (newChat.Title != null) chat.Title = newChat.Title;
             if (newChat.LastName != null) chat.LastName = newChat.LastName;
             if (newChat.FirstName != null) chat.FirstName = newChat.FirstName;
-            if (newChat.IsForum != null) chat.IsForum = newChat.IsForum;
+            chat.IsForum = newChat.IsForum;
+            chat.Type = newChat.Type;
         }
         else {
             chat = new TelegramChat(newChat);
