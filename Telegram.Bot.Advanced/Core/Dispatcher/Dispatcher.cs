@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
+using System.Text.Json;
 using Telegram.Bot.Advanced.Controller;
 using Telegram.Bot.Advanced.Core.Dispatcher.Filters;
 using Telegram.Bot.Advanced.Core.Holder;
@@ -204,8 +204,8 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher
                 throw;
             }
             
-            Logger?.LogTrace("Command: {Command}", JsonConvert.SerializeObject(command, Formatting.Indented));
-            Logger?.LogTrace("Chat: {Chat}", JsonConvert.SerializeObject(chat, Formatting.Indented));
+            Logger?.LogTrace("Command: {Command}", JsonSerializer.Serialize(command, new JsonSerializerOptions { WriteIndented = true }));
+            Logger?.LogTrace("Chat: {Chat}", JsonSerializer.Serialize(chat, new JsonSerializerOptions { WriteIndented = true }));
 
             try {
                 await SetupAndExecute(scope, update, firstMethod, command, context, chat);
@@ -277,15 +277,23 @@ namespace Telegram.Bot.Advanced.Core.Dispatcher
             if (chat != null) {
                 if (newChat.Username != null) chat.Username = newChat.Username;
                 if (newChat.Title != null) chat.Title = newChat.Title;
-                if (newChat.Description != null) chat.Description = newChat.Description;
-                if (newChat.InviteLink != null) chat.InviteLink = newChat.InviteLink;
                 if (newChat.LastName != null) chat.LastName = newChat.LastName;
-                if (newChat.StickerSetName != null) chat.StickerSetName = newChat.StickerSetName;
                 if (newChat.FirstName != null) chat.FirstName = newChat.FirstName;
-                if (newChat.CanSetStickerSet != null) chat.CanSetStickerSet = newChat.CanSetStickerSet;
+
+                var chatFullInfo = await BotData.Bot.GetChat(newChat.Id);
+                if (chatFullInfo.Description != null) chat.Description = chatFullInfo.Description;
+                if (chatFullInfo.InviteLink != null) chat.InviteLink = chatFullInfo.InviteLink;
+                if (chatFullInfo.StickerSetName != null) chat.StickerSetName = chatFullInfo.StickerSetName;
+                chat.CanSetStickerSet = chatFullInfo.CanSetStickerSet;
             }
             else {
                 chat = new TelegramChat(newChat);
+
+                var chatFullInfo = await BotData.Bot.GetChat(newChat.Id);
+                chat.Description = chatFullInfo.Description;
+                chat.InviteLink = chatFullInfo.InviteLink;
+                chat.StickerSetName = chatFullInfo.StickerSetName;
+                chat.CanSetStickerSet = chatFullInfo.CanSetStickerSet;
                     
                 // Check if the chat has a default role and set it, if any
                 var defaultRole = BotData.DefaultUserRole.FirstOrDefault(d => d.Equals(chat));

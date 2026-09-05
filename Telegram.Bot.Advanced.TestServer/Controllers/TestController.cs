@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -21,10 +22,11 @@ namespace Telegram.Bot.Advanced.TestServer.Controllers {
         [HttpGet("webhook")]
         public async Task<IActionResult> Index() {
             List<string> webhooks = new List<string>();
+            var baseUrl = _configuration["Telegram:BaseUrl"] ?? throw new InvalidOperationException("Telegram:BaseUrl configuration value is required.");
+            var webhookPath = _configuration["Telegram:Webhook"] ?? throw new InvalidOperationException("Telegram:Webhook configuration value is required.");
             foreach (var bot in _holder) {
-                await bot.Bot.SetWebhookAsync(_configuration["Telegram:BaseUrl"] + _configuration["Telegram:Webhook"] +
-                                              bot.Endpoint);
-                webhooks.Add((await bot.Bot.GetWebhookInfoAsync()).Url);
+                await bot.Bot.SetWebhook(baseUrl + webhookPath + bot.Endpoint);
+                webhooks.Add((await bot.Bot.GetWebhookInfo()).Url);
             }
             return Ok(webhooks);
         }

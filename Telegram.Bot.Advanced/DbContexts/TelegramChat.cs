@@ -43,10 +43,6 @@ namespace Telegram.Bot.Advanced.DbContexts
             Title = update.Title;
             FirstName = update.FirstName;
             LastName = update.LastName;
-            Description = update.Description;
-            InviteLink = update.InviteLink;
-            StickerSetName = update.StickerSetName;
-            CanSetStickerSet = update.CanSetStickerSet;
             NewsletterChats = new List<NewsletterChat>();
         }
 

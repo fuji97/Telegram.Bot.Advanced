@@ -18,18 +18,18 @@ namespace Telegram.Bot.Advanced.TestServer.TelegramController {
 
         [CommandFilter("help")]
         public void Help() {
-            BotData.Bot.SendTextMessageAsync(TelegramChat.Id, "Hello World!\nSiamo in polling mode.").Wait();
+            BotData.Bot.SendMessage(TelegramChat!.Id, "Hello World!\nSiamo in polling mode.").Wait();
         }
         
         [CommandFilter("async")]
         public async Task AsyncMethod() {
-            await BotData.Bot.SendTextMessageAsync(TelegramChat.Id, "Hello World!\nSiamo in polling mode.");
+            await BotData.Bot.SendMessage(TelegramChat!.Id, "Hello World!\nSiamo in polling mode.");
             //_logger.LogInformation(result.Caption);
         }
 
         [CommandFilter("setup")]
         public async Task Setup() {
-            TelegramChat.Role = ChatRole.Administrator;
+            TelegramChat!.Role = ChatRole.Administrator;
             await _newsletterService.CreateNewsletterAsync(new Newsletter("default", "The default newsletter."));
             await TelegramContext.SaveChangesAsync();
 

@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Telegram.Bot.Advanced.DbContexts {
     public class NewsletterChat {

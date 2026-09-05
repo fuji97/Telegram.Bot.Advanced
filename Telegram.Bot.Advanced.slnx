@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Telegram.Bot.Advanced.TestServer/Telegram.Bot.Advanced.TestServer.csproj" />
+  <Project Path="Telegram.Bot.Advanced/Telegram.Bot.Advanced.csproj" />
+</Solution>

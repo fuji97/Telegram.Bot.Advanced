@@ -1,10 +1,10 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Serilog;
 using Telegram.Bot;
 using Telegram.Bot.Advanced.Controller;
 using Telegram.Bot.Advanced.Core.Dispatcher;
@@ -33,7 +33,6 @@ if (mode == StartupTypeConst.Polling) {
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Logging.AddSerilog();
 builder.Configuration.AddUserSecrets<Program>();
 
 var services = builder.Services;
@@ -42,14 +41,17 @@ var configuration = builder.Configuration;
 services.AddEntityFrameworkInMemoryDatabase();
 services.AddDbContext<TestTelegramContext>();
 
+var botToken = configuration["BotToken"] ?? throw new InvalidOperationException("BotToken configuration value is required.");
+var webhookBasePath = configuration["Telegram:Webhook"] ?? throw new InvalidOperationException("Telegram:Webhook configuration value is required.");
+
 services.AddTelegramHolder(
     new TelegramBotData(options => {
-        options.CreateTelegramBotClient(configuration["BotToken"]);
+        options.CreateTelegramBotClient(botToken);
                     
         options.DispatcherBuilder = new DispatcherBuilder<TestTelegramContext, TelegramPollingController>()
             .RegisterNewsletterController<TestTelegramContext>();
                     
-        options.BasePath = configuration["Telegram:Webhook"];
+        options.BasePath = webhookBasePath;
                     
         options.DefaultUserRole.Add(
             new UserRole("fuji97", ChatRole.Administrator)
@@ -61,14 +63,13 @@ services.AddTelegramHolder(
         options.StartupNewsletter = new StartupNewsletter("startup", (data, chat, sp) => {
             var logger = sp.GetService<ILogger<Program>>();
             logger?.LogInformation("Sending startup message to {Username}", chat.Username);
-            data.Bot.SendTextMessageAsync(chat.Id, $"The bot @{data.Username} is now online!");
+            data.Bot.SendMessage(chat.Id, $"The bot @{data.Username} is now online!");
         });
     })
 );
 
 services.AddNewsletter<TestTelegramContext>();
-
-builder.Services.AddControllersWithViews();
+services.AddControllers();
 
 // Build App
 var app = builder.Build();
@@ -79,9 +80,6 @@ app.UseStartupNewsletter();
 // Seed database
 app.SeedData();
             
-if (app.Environment.IsDevelopment()) {
-    app.UseDeveloperExceptionPage();
-}
 
 switch (startupType) {
     case StartupType.Polling:
@@ -90,11 +88,12 @@ switch (startupType) {
         break;
     case StartupType.Webhook:
         logger.LogInformation("Starting in webhook mode...");
+        var webhookBaseUrl = configuration["Telegram:BaseUrl"] ?? throw new InvalidOperationException("Telegram:BaseUrl configuration value is required.");
         app.UseTelegramRouting(new TelegramRoutingOptions() {
-            WebhookBaseUrl = configuration["BaseUrl"]
+            WebhookBaseUrl = webhookBaseUrl
         });
         break;
 }
-app.UseRouting();
+app.MapControllers();
 
 app.Run();

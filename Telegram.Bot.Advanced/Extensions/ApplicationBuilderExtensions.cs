@@ -9,7 +9,7 @@ using Telegram.Bot.Advanced.Core.Middlewares;
 using Telegram.Bot.Advanced.Core.Tools;
 using Telegram.Bot.Advanced.Exceptions;
 using Telegram.Bot.Advanced.Services;
-using Telegram.Bot.Extensions.Polling;
+using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 
 namespace Telegram.Bot.Advanced.Extensions {
@@ -29,18 +29,18 @@ namespace Telegram.Bot.Advanced.Extensions {
                     if (options.WebhookUrl != null) {
                         var url = options.WebhookUrl;
                         logger?.LogDebug("Setting webhook at URL '{Url}'", Utils.ObfuscateToken(url));
-                        bot.Bot.SetWebhookAsync(url).Start();
+                        bot.Bot.SetWebhook(url);
                     } else if (options.WebhookBaseUrl != null) {
                         var url = Url.Combine(options.WebhookBaseUrl, bot.BasePath, bot.Endpoint);
                         logger?.LogDebug("Setting webhook at URL '{Url}'", Utils.ObfuscateToken(url));
-                        bot.Bot.SetWebhookAsync(url).Start();
+                        bot.Bot.SetWebhook(url);
                     }
                     else {
                         logger?.LogWarning("Missing both WebhookUrl and WebhookBaseUrl. Telegram's webhook update skipped");
                     }
                 }
                 bot.Dispatcher.SetServices(app.ApplicationServices);
-                bot.Username = (bot.Bot.GetMeAsync().Result).Username;
+                bot.Username = (bot.Bot.GetMe().Result).Username;
             }
             return app;
         }
@@ -60,16 +60,16 @@ namespace Telegram.Bot.Advanced.Extensions {
                 var cts = new CancellationTokenSource();
                 var cancellationToken = cts.Token;
                 var receiverOptions = new ReceiverOptions {
-                    AllowedUpdates = {} // receive all update types
+                    AllowedUpdates = Update.AllTypes // receive all update types
                 };
                 
-                bot.Bot.DeleteWebhookAsync(cancellationToken: cancellationToken).Wait(cancellationToken);
+                bot.Bot.DeleteWebhook(cancellationToken: cancellationToken).Wait(cancellationToken);
                 app.Map(bot.BasePath + bot.Endpoint, 
                     builder => builder.Run(async context => {
                         context.Response.StatusCode = 200;
                         await context.Response.WriteAsync("Ok", cancellationToken);
                     }));
-                User me = bot.Bot.GetMeAsync(cancellationToken).Result;
+                User me = bot.Bot.GetMe(cancellationToken).Result;
                 bot.Username = me.Username;
                 bot.Bot.StartReceiving((client, update, cancelToken) => bot.Dispatcher.DispatchUpdateAsync(update, app.ApplicationServices),
                     (client, exception, cancelToken) => bot.Dispatcher.HandleErrorAsync(exception, app.ApplicationServices), 

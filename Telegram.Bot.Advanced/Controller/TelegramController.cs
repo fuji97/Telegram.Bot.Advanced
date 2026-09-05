@@ -6,7 +6,6 @@ using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.Models;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Telegram.Bot.Advanced.Controller {
@@ -25,27 +24,25 @@ namespace Telegram.Bot.Advanced.Controller {
         /// Shortcut to send a message to current chat
         /// </summary>
         /// <param name="text"></param>
-        /// <param name="mode"></param>
+        /// <param name="parseMode"></param>
         /// <param name="entities"></param>
-        /// <param name="disableWebPagePreview"></param>
+        /// <param name="linkPreviewOptions"></param>
         /// <param name="disableNotification"></param>
-        /// <param name="replyToMessageId"></param>
-        /// <param name="allowSendingWithoutReply"></param>
+        /// <param name="replyParameters"></param>
         /// <param name="replyMarkup"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        /// <see cref="Telegram.Bot.TelegramBotClient.SendTextMessageAsync"/>
-        protected async Task<Message> ReplyTextMessageAsync(string text, 
-            ParseMode? mode = null,
+        /// <see cref="Telegram.Bot.TelegramBotClientExtensions.SendMessage"/>
+        protected async Task<Message> ReplyTextMessageAsync(string text,
+            ParseMode parseMode = default,
             IEnumerable<MessageEntity>? entities = null,
-            bool? disableWebPagePreview = null,
-            bool? disableNotification = null,
-            int? replyToMessageId = null,
-            bool? allowSendingWithoutReply = null,
-            IReplyMarkup? replyMarkup = null,
-            CancellationToken cancellationToken = default (CancellationToken)) {
-            return await BotData.Bot.SendTextMessageAsync(TelegramChat!.Id, text, mode, entities, disableWebPagePreview, disableNotification, 
-                replyToMessageId, allowSendingWithoutReply, replyMarkup, cancellationToken);
+            LinkPreviewOptions? linkPreviewOptions = null,
+            bool disableNotification = false,
+            ReplyParameters? replyParameters = null,
+            ReplyMarkup? replyMarkup = null,
+            CancellationToken cancellationToken = default) {
+            return await BotData.Bot.SendMessage(TelegramChat!.Id, text, parseMode, replyParameters, replyMarkup, linkPreviewOptions,
+                entities: entities, disableNotification: disableNotification, cancellationToken: cancellationToken);
         }
 
         /// <summary>
@@ -53,20 +50,18 @@ namespace Telegram.Bot.Advanced.Controller {
         /// </summary>
         /// <param name="sticker"></param>
         /// <param name="disableNotification"></param>
-        /// <param name="replyToMessageId"></param>
-        /// <param name="allowSendingWithoutReply"></param>
+        /// <param name="replyParameters"></param>
         /// <param name="replyMarkup"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        /// <see cref="Telegram.Bot.TelegramBotClient.SendStickerAsync"/>
-        protected async Task<Message> ReplyStickerAsync(InputOnlineFile sticker,
-            bool? disableNotification = null,
-            int? replyToMessageId = null,
-            bool? allowSendingWithoutReply = null,
-            IReplyMarkup? replyMarkup = null,
-            CancellationToken cancellationToken = default (CancellationToken)) {
-            return await BotData.Bot.SendStickerAsync(TelegramChat!.Id, sticker, disableNotification, replyToMessageId,
-                allowSendingWithoutReply, replyMarkup, cancellationToken);
+        /// <see cref="Telegram.Bot.TelegramBotClientExtensions.SendSticker"/>
+        protected async Task<Message> ReplyStickerAsync(InputFile sticker,
+            bool disableNotification = false,
+            ReplyParameters? replyParameters = null,
+            ReplyMarkup? replyMarkup = null,
+            CancellationToken cancellationToken = default) {
+            return await BotData.Bot.SendSticker(TelegramChat!.Id, sticker, replyParameters, replyMarkup,
+                disableNotification: disableNotification, cancellationToken: cancellationToken);
         }
 
         /// <summary>
@@ -77,23 +72,21 @@ namespace Telegram.Bot.Advanced.Controller {
         /// <param name="parseMode"></param>
         /// <param name="captionEntities"></param>
         /// <param name="disableNotification"></param>
-        /// <param name="replyToMessageId"></param>
-        /// <param name="allowSendingWithoutReply"></param>
+        /// <param name="replyParameters"></param>
         /// <param name="replyMarkup"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        /// <see cref="Telegram.Bot.TelegramBotClient.SendPhotoAsync"/>
-        protected async Task<Message> ReplyPhotoAsync(InputOnlineFile photo,
+        /// <see cref="Telegram.Bot.TelegramBotClientExtensions.SendPhoto"/>
+        protected async Task<Message> ReplyPhotoAsync(InputFile photo,
             string? caption = null,
-            ParseMode? parseMode = null,
+            ParseMode parseMode = default,
             IEnumerable<MessageEntity>? captionEntities = null,
-            bool? disableNotification = null,
-            int? replyToMessageId = null,
-            bool? allowSendingWithoutReply = null,
-            IReplyMarkup? replyMarkup = null,
-            CancellationToken cancellationToken = default (CancellationToken)) {
-            return await BotData.Bot.SendPhotoAsync(TelegramChat!.Id, photo, caption, parseMode, captionEntities, disableNotification,
-                replyToMessageId, allowSendingWithoutReply, replyMarkup, cancellationToken);
+            bool disableNotification = false,
+            ReplyParameters? replyParameters = null,
+            ReplyMarkup? replyMarkup = null,
+            CancellationToken cancellationToken = default) {
+            return await BotData.Bot.SendPhoto(TelegramChat!.Id, photo, caption, parseMode, replyParameters, replyMarkup,
+                captionEntities: captionEntities, disableNotification: disableNotification, cancellationToken: cancellationToken);
         }
     }
 }

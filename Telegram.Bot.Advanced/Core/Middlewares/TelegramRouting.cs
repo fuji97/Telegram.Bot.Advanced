@@ -1,9 +1,8 @@
 ﻿using System;
-using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
+using System.Text.Json;
 using Telegram.Bot.Advanced.Core.Holder;
 using Telegram.Bot.Types;
 
@@ -19,13 +18,13 @@ namespace Telegram.Bot.Advanced.Core.Middlewares {
         public async Task InvokeAsync(HttpContext context, ITelegramHolder holder, IServiceProvider provider,
             ILogger<TelegramRouting> logger) {
             
-            Update update;
-            var serializer = new JsonSerializer();
+            Update? update;
 
-            using (var sr = new StreamReader(context.Request.Body))
-            using (var jsonTextReader = new JsonTextReader(sr))
-            {
-                update = serializer.Deserialize<Update>(jsonTextReader);
+            try {
+                update = await JsonSerializer.DeserializeAsync<Update>(context.Request.Body, JsonBotAPI.Options);
+            }
+            catch (JsonException) {
+                update = null;
             }
 
             if (update != null) {

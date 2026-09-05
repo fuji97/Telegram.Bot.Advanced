@@ -22,11 +22,6 @@ namespace Telegram.Bot.Advanced.DbContexts
                 .WithOne(c => c.Chat)
                 .HasForeignKey(c => c.UserId);
 
-            modelBuilder.Entity<Data>()
-                .HasOne(dt => dt.Chat)
-                .WithMany(c => c.Data)
-                .HasForeignKey(dt => new { dt.UserId, dt.Key });
-
             modelBuilder.Entity<NewsletterChat>()
                 .HasKey(t => new {t.NewsletterKey, t.ChatId});
             modelBuilder.Entity<NewsletterChat>()

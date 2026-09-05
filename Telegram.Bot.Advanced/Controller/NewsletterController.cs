@@ -131,20 +131,20 @@ namespace Telegram.Bot.Advanced.Controller {
             Func<TelegramChat, Task> sendFunction;
             switch (Update.Message?.Type) {
                 case MessageType.Text:
-                    sendFunction = async chat => await BotData.Bot.SendTextMessageAsync(chat.Id, Update.Message.Text!, ParseMode.Html);
+                    sendFunction = async chat => await BotData.Bot.SendMessage(chat.Id, Update.Message.Text!, ParseMode.Html);
                     break;
                 case MessageType.Photo:
-                    sendFunction = async chat => await BotData.Bot.SendPhotoAsync(chat.Id, 
+                    sendFunction = async chat => await BotData.Bot.SendPhoto(chat.Id, 
                         Update.Message!.Photo!.First().FileId, 
                         Update.Message.Text);
                     break;
                 case MessageType.Audio:
-                    sendFunction = async chat => await BotData.Bot.SendAudioAsync(chat.Id,
+                    sendFunction = async chat => await BotData.Bot.SendAudio(chat.Id,
                         Update.Message!.Audio!.FileId,
                         Update.Message.Text);
                     break;
                 case MessageType.Sticker:
-                    sendFunction = async chat => await BotData.Bot.SendStickerAsync(chat.Id,
+                    sendFunction = async chat => await BotData.Bot.SendSticker(chat.Id,
                         Update.Message!.Sticker!.FileId);
                     break;
                 // TODO Implements poll?
@@ -178,7 +178,7 @@ namespace Telegram.Bot.Advanced.Controller {
 
         private async Task<bool> CheckIfAdminInGroups() {
             if (TelegramChat is {Type: ChatType.Supergroup or ChatType.Group}) {
-                var administrators = (await BotData.Bot.GetChatAdministratorsAsync(TelegramChat.Id))
+                var administrators = (await BotData.Bot.GetChatAdministrators(TelegramChat.Id))
                     .Select(a => a.User.Id);
 
                 if (Update.Message?.From is null || !administrators.Contains(Update.Message.From.Id)) {

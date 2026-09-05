@@ -1,0 +1,11 @@
+{
+  "servers": {
+    "csharp-ls": {
+      "command": "csharp-ls",
+      "fileTypes": [".cs"],
+      "languageId": "csharp",
+      "rootMarkers": ["*.sln", "*.csproj"],
+      "warmupTimeoutMs": 30000
+    }
+  }
+}

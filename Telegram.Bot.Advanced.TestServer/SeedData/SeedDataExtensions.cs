@@ -8,7 +8,7 @@ namespace Telegram.Bot.Advanced.TestServer.SeedData {
             using (var scope = app.ApplicationServices.CreateScope())
             {
                 var services = scope.ServiceProvider;
-                var context = services.GetService<TestTelegramContext>();
+                var context = services.GetRequiredService<TestTelegramContext>();
  
                 new DataSeeder(context).SeedData();
             }
