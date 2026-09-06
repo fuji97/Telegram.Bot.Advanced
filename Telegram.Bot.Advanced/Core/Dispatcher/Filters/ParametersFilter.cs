@@ -3,16 +3,14 @@ using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.Models;
 using Telegram.Bot.Types;
 
-namespace Telegram.Bot.Advanced.Core.Dispatcher.Filters {
-    public class ParametersFilter : DispatcherFilterAttribute {
-        private readonly int _qnt;
+namespace Telegram.Bot.Advanced.Core.Dispatcher.Filters;
 
-        public ParametersFilter(int qnt) {
-            _qnt = qnt;
-        }
-        
-        public override bool IsValid(Update update, TelegramChat? chat, MessageCommand command, ITelegramBotData botData) {
-            return command?.Parameters.Count == _qnt;
-        }
+public sealed class ParametersFilter : DispatcherFilterAttribute {
+    private readonly int _qnt;
+
+    public ParametersFilter(int qnt) {
+        _qnt = qnt;
     }
+
+    public override bool IsValid(Update update, TelegramChat? chat, MessageCommand command, ITelegramBotData botData) => command?.Parameters.Count == _qnt;
 }

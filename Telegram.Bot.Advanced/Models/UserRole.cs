@@ -1,37 +1,34 @@
 using Telegram.Bot.Advanced.DbContexts;
 
-namespace Telegram.Bot.Advanced.Models {
-    public class UserRole {
-        public long UserId { get; set; }
-        public string? Username { get; set; }
-        public SelectUserBy SelectUserBy { get; set; }
-        public ChatRole Role { get; set; }
+namespace Telegram.Bot.Advanced.Models;
 
-        public UserRole(long userId, ChatRole role) {
-            UserId = userId;
-            SelectUserBy = SelectUserBy.UserId;
-            Role = role;
-        }
-        
-        public UserRole(string? username, ChatRole role) {
-            Username = username;
-            SelectUserBy = SelectUserBy.Username;
-            Role = role;
+public sealed class UserRole {
+    public long UserId { get; set; }
+    public string? Username { get; set; }
+    public SelectUserBy SelectUserBy { get; set; }
+    public ChatRole Role { get; set; }
+
+    public UserRole(long userId, ChatRole role) {
+        UserId = userId;
+        SelectUserBy = SelectUserBy.UserId;
+        Role = role;
+    }
+
+    public UserRole(string? username, ChatRole role) {
+        Username = username;
+        SelectUserBy = SelectUserBy.Username;
+        Role = role;
+    }
+
+    public bool Equals(TelegramChat? chat) {
+        if (chat == null) {
+            return false;
         }
 
-        public bool Equals(TelegramChat? chat) {
-            if (chat == null) {
-                return false;
-            }
-            
-            switch (SelectUserBy) {
-                case SelectUserBy.Username:
-                    return Username == chat.Username;
-                case SelectUserBy.UserId:
-                    return UserId == chat.Id;
-                default:
-                    return false;
-            }
-        }
+        return SelectUserBy switch {
+            SelectUserBy.Username => Username == chat.Username,
+            SelectUserBy.UserId => UserId == chat.Id,
+            _ => false
+        };
     }
 }

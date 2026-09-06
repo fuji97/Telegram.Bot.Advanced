@@ -1,28 +1,28 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+using System.Collections;
+using System.Collections.Frozen;
+using System.Diagnostics.CodeAnalysis;
 
-namespace Telegram.Bot.Advanced.Core.Holder {
-    public class TelegramHolder : ITelegramHolder {
-        private Dictionary<string, ITelegramBotData> Bots { get; }
+namespace Telegram.Bot.Advanced.Core.Holder;
 
-        public TelegramHolder(IEnumerable<ITelegramBotData> bots) {
-            Bots = new Dictionary<string, ITelegramBotData>();
-            foreach (var bot in bots) {
-                Bots[bot.Endpoint] = bot;
+public sealed class TelegramHolder : ITelegramHolder {
+    private readonly FrozenDictionary<string, ITelegramBotData> _bots;
+
+    public TelegramHolder(IEnumerable<ITelegramBotData> bots) {
+        ArgumentNullException.ThrowIfNull(bots);
+
+        var map = new Dictionary<string, ITelegramBotData>(StringComparer.Ordinal);
+        foreach (var bot in bots) {
+            if (!map.TryAdd(bot.Endpoint, bot)) {
+                throw new ArgumentException($"Duplicate bot endpoint '{bot.Endpoint}'.", nameof(bots));
             }
         }
 
-        public ITelegramBotData Get(string key) {
-            return Bots[key];
-        }
-
-        public IEnumerator<ITelegramBotData> GetEnumerator() {
-            return Bots.Select(pair => pair.Value).GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator() {
-            return GetEnumerator();
-        }
+        _bots = map.ToFrozenDictionary(StringComparer.Ordinal);
     }
+
+    public bool TryGet(string endpoint, [NotNullWhen(true)] out ITelegramBotData? bot) => _bots.TryGetValue(endpoint, out bot);
+
+    public IEnumerator<ITelegramBotData> GetEnumerator() => ((IEnumerable<ITelegramBotData>)_bots.Values).GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

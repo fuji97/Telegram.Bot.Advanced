@@ -3,12 +3,9 @@ using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.Models;
 using Telegram.Bot.Types;
 
-namespace Telegram.Bot.Advanced.Core.Dispatcher.Filters
+namespace Telegram.Bot.Advanced.Core.Dispatcher.Filters;
+
+public sealed class NoCommandFilter : DispatcherFilterAttribute
 {
-    public class NoCommandFilter : DispatcherFilterAttribute
-    {
-        public override bool IsValid(Update update, TelegramChat? user, MessageCommand command, ITelegramBotData botData) {
-            return command == null || !command.IsCommand();
-        }
-    }
+    public override bool IsValid(Update update, TelegramChat? user, MessageCommand command, ITelegramBotData botData) => command == null || !command.IsCommand();
 }

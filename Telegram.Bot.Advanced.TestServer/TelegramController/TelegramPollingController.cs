@@ -1,39 +1,36 @@
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using Telegram.Bot.Advanced.Controller;
 using Telegram.Bot.Advanced.Core.Dispatcher.Filters;
 using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.Models;
 using Telegram.Bot.Advanced.Services;
 
-namespace Telegram.Bot.Advanced.TestServer.TelegramController {
-    public class TelegramPollingController : TelegramController<TestTelegramContext> {
-        private readonly ILogger<TelegramPollingController> _logger;
-        private readonly INewsletterService _newsletterService;
+namespace Telegram.Bot.Advanced.TestServer.TelegramController;
 
-        public TelegramPollingController(ILogger<TelegramPollingController> logger, INewsletterService newsletterService) {
-            _logger = logger;
-            _newsletterService = newsletterService;
-        }
+public sealed class TelegramPollingController : TelegramController<TestTelegramContext> {
+    private readonly ILogger<TelegramPollingController> _logger;
+    private readonly INewsletterService _newsletterService;
 
-        [CommandFilter("help")]
-        public void Help() {
-            BotData.Bot.SendMessage(TelegramChat!.Id, "Hello World!\nSiamo in polling mode.").Wait();
-        }
-        
-        [CommandFilter("async")]
-        public async Task AsyncMethod() {
-            await BotData.Bot.SendMessage(TelegramChat!.Id, "Hello World!\nSiamo in polling mode.");
-            //_logger.LogInformation(result.Caption);
-        }
+    public TelegramPollingController(ILogger<TelegramPollingController> logger, INewsletterService newsletterService) {
+        _logger = logger;
+        _newsletterService = newsletterService;
+    }
 
-        [CommandFilter("setup")]
-        public async Task Setup() {
-            TelegramChat!.Role = ChatRole.Administrator;
-            await _newsletterService.CreateNewsletterAsync(new Newsletter("default", "The default newsletter."));
-            await TelegramContext.SaveChangesAsync();
+    [CommandFilter("help")]
+    public async Task Help() {
+        await BotData.Bot.SendMessage(TelegramChat!.Id, "Hello World!\nSiamo in polling mode.", cancellationToken: CancellationToken);
+    }
 
-            await ReplyTextMessageAsync("Done");
-        }
+    [CommandFilter("async")]
+    public async Task AsyncMethod() {
+        await BotData.Bot.SendMessage(TelegramChat!.Id, "Hello World!\nSiamo in polling mode.", cancellationToken: CancellationToken);
+    }
+
+    [CommandFilter("setup")]
+    public async Task Setup() {
+        TelegramChat!.Role = ChatRole.Administrator;
+        await _newsletterService.CreateNewsletterAsync(new Newsletter("default", "The default newsletter."), CancellationToken);
+        await TelegramContext.SaveChangesAsync(CancellationToken);
+
+        await ReplyTextMessageAsync("Done", cancellationToken: CancellationToken);
     }
 }

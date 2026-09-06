@@ -4,26 +4,25 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Fuji97</Authors>
     <Company></Company>
-    <Version>5.0</Version>
-    <AssemblyVersion>5.0</AssemblyVersion>
-    <FileVersion>5.0</FileVersion>
+    <Version>9.0.0-alpha</Version>
     <Description>An extension for Telegram.Bot to support dispatching based of filters and Dependency Injection</Description>
     <Copyright>Copyright © Federico Rapetti</Copyright>
     <PackageProjectUrl>https://github.com/fuji97/Telegram.Bot.Advanced</PackageProjectUrl>
     <RepositoryUrl>https://github.com/fuji97/Telegram.Bot.Advanced</RepositoryUrl>
     <PackageTags>Telegram Bot Api</PackageTags>
     <PackageLicenseFile>license.txt</PackageLicenseFile>
-    <PackageVersion>6.0.2-beta</PackageVersion>
     <Title>Telegram.Bot.Advanced</Title>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Flurl" Version="4.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.11" />
     <PackageReference Include="Telegram.Bot" Version="22.10.3" />
   </ItemGroup>
+
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />

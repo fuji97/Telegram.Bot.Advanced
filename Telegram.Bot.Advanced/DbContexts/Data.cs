@@ -1,65 +1,38 @@
-﻿﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
-namespace Telegram.Bot.Advanced.DbContexts
-{
-    public class Data {
-        public long UserId { get; set; }
-        public string Key { get; set; } = null!;
-        public string? Value { get; set; }
-        [JsonIgnore]
-        public TelegramChat Chat { get; set; } = null!;
+namespace Telegram.Bot.Advanced.DbContexts;
 
-        public Data() { }
+public sealed class Data : IEquatable<Data> {
+    public long UserId { get; set; }
+    public string Key { get; set; } = null!;
+    public string? Value { get; set; }
+    [JsonIgnore]
+    public TelegramChat Chat { get; set; } = null!;
 
-        public Data(TelegramChat user, string key, string? value) {
-            UserId = user.Id;
-            Key = key;
-            Value = value;
-        }
+    public Data() { }
 
-        public override bool Equals(object? obj) {
-            if (obj is Data data) {
-                return UserId == data.UserId && Key == data.Key && Value == data.Value;
-            }
-            return false;
-        }
-
-        protected bool Equals(Data other) {
-            return UserId == other.UserId && string.Equals(Key, other.Key) && string.Equals(Value, other.Value);
-        }
-
-        public override int GetHashCode() {
-            unchecked {
-                var hashCode = UserId.GetHashCode();
-                hashCode = (hashCode * 397) ^ (Key != null ? Key.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (Value != null ? Value.GetHashCode() : 0);
-                return hashCode;
-            }
-        }
-
-        public static bool operator ==(Data? left, Data? right) {
-            if (ReferenceEquals(null, left) && ReferenceEquals(null, right))
-            {
-                return false;
-            }
-
-            if (ReferenceEquals(null, left) || ReferenceEquals(null, right))
-            {
-                return true;
-            }
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(Data? left, Data? right)
-        {
-            if (ReferenceEquals(null, left) && ReferenceEquals(null, right)) {
-                return false;
-            }
-
-            if (ReferenceEquals(null, left) || ReferenceEquals(null, right)) {
-                return true;
-            }
-            return !left.Equals(right);
-        }
+    public Data(TelegramChat chat, string key, string? value) {
+        Chat = chat;
+        UserId = chat.Id;
+        Key = key;
+        Value = value;
     }
+
+    public bool Equals(Data? other) {
+        if (ReferenceEquals(this, other)) return true;
+        if (other is null) return false;
+        return UserId == other.UserId && Key == other.Key && Value == other.Value;
+    }
+
+    public override bool Equals(object? obj) => obj is Data other && Equals(other);
+
+    public override int GetHashCode() => HashCode.Combine(UserId, Key, Value);
+
+    public static bool operator ==(Data? left, Data? right) {
+        if (ReferenceEquals(left, right)) return true;
+        if (left is null || right is null) return false;
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(Data? left, Data? right) => !(left == right);
 }

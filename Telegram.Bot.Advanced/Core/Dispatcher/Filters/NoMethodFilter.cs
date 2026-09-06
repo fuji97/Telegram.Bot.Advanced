@@ -1,7 +1,5 @@
-using System;
+namespace Telegram.Bot.Advanced.Core.Dispatcher.Filters;
 
-namespace Telegram.Bot.Advanced.Core.Dispatcher.Filters {
-    [AttributeUsage(AttributeTargets.Method)]
-    public class NoMethodFilter : Attribute {
-    }
+[AttributeUsage(AttributeTargets.Method)]
+public sealed class NoMethodFilter : Attribute {
 }

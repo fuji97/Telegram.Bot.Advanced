@@ -5,7 +5,8 @@
         <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
       <UserSecretsId>3e34bca9-607f-42c2-b6c6-ee90851b7fae</UserSecretsId>
       <Nullable>enable</Nullable>
-      <WarningsAsErrors>nullable</WarningsAsErrors>
+      <ImplicitUsings>enable</ImplicitUsings>
+      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
     <ItemGroup>

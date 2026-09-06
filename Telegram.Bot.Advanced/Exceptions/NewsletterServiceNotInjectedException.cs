@@ -1,20 +1,13 @@
-using System;
+namespace Telegram.Bot.Advanced.Exceptions;
 
-namespace Telegram.Bot.Advanced.Exceptions {
-    public class NewsletterServiceNotInjectedException : TelegramBotAdvancedException {
-        public NewsletterServiceNotInjectedException() { }
-        public NewsletterServiceNotInjectedException(string message) : base(message) { }
-        public NewsletterServiceNotInjectedException(string message, Exception inner) : base(message, inner) { }
+/// <summary>
+/// Throws if the INewsletterService was not injected in the DI Container in ConfigureServices
+/// </summary>
+public sealed class NewsletterServiceNotInjectedException : TelegramBotAdvancedException {
+    private const string DefaultMessage =
+        "INewsletterService was not injected in the DI Container, you have to set it by calling IServiceCollection.AddNewsletter()";
 
-        // A constructor is needed for serialization when an
-        // exception propagates from a remoting server to the client. 
-        protected NewsletterServiceNotInjectedException(System.Runtime.Serialization.SerializationInfo info,
-            System.Runtime.Serialization.StreamingContext context)
-        { }
-
-        public override string ToString() {
-            return
-                "INewsletterService was not injected in the DI Container, yuo have to set it by calling IServiceCollection.AddNewsletter()";
-        }
-    }
+    public NewsletterServiceNotInjectedException() : base(DefaultMessage) { }
+    public NewsletterServiceNotInjectedException(string message) : base(message) { }
+    public NewsletterServiceNotInjectedException(string message, Exception inner) : base(message, inner) { }
 }

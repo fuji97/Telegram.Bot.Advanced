@@ -1,14 +1,15 @@
-using System;
+namespace Telegram.Bot.Advanced.Exceptions;
 
-namespace Telegram.Bot.Advanced.Exceptions {
-    public class MaximumSizeExceededException : Exception {
-        public MaximumSizeExceededException() {
-        }
+/// <summary>
+/// Thrown when a computed value (e.g. combined callback command and data) exceeds a size limit imposed by Telegram
+/// </summary>
+public sealed class MaximumSizeExceededException : ArgumentOutOfRangeException {
+    public MaximumSizeExceededException() {
+    }
 
-        public MaximumSizeExceededException(string message) : base(message) {
-        }
+    public MaximumSizeExceededException(string message) : base(paramName: null, message: message) {
+    }
 
-        public MaximumSizeExceededException(string message, Exception innerException) : base(message, innerException) {
-        }
+    public MaximumSizeExceededException(string message, Exception innerException) : base(message, innerException) {
     }
 }

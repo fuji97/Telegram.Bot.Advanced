@@ -1,74 +1,48 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Telegram.Bot.Advanced.DbContexts;
 using Telegram.Bot.Advanced.Models;
 
-namespace Telegram.Bot.Advanced.Services {
-    public interface INewsletterService {
-        /// <summary>
-        /// Execute the action sendAction asynchronously for each subscribed chat. The TelegramChat parameter in the 
-        /// action change on every iteration for every chat subscribed to the newsletter.
-        /// </summary>
-        /// <param name="newsletterKey"></param>
-        /// <param name="sendAction"></param>
-        /// <returns>The result of the operation</returns>
-        Task<SendResult> SendNewsletterAsync(string newsletterKey, Func<TelegramChat, Task> sendAction);
-        
-        /// <summary>
-        /// Execute the action sendAction for each subscribed chat. The TelegramChat parameter in the 
-        /// action change on every iteration for every chat subscribed to the newsletter.
-        /// </summary>
-        /// <param name="newsletterKey"></param>
-        /// <param name="sendAction"></param>
-        /// <returns>The result of the operation</returns>
-        SendResult SendNewsletter(string newsletterKey, Action<TelegramChat> sendAction);
-        
-        /// <summary>
-        /// Execute the action sendAction asynchronously for each chat. The TelegramChat parameter in the 
-        /// action change on every iteration for every chat.
-        /// </summary>
-        /// <param name="sendAction"></param>
-        /// <returns>The result of the operation</returns>
-        Task<SendResult> SendNewsletterAsync(Func<TelegramChat, Task> sendAction);
-        
-        /// <summary>
-        /// Execute the action sendAction for each chat. The TelegramChat parameter in the 
-        /// action change on every iteration for every chat.
-        /// </summary>
-        /// <param name="sendAction"></param>
-        /// <returns>The result of the operation</returns>
-        SendResult SendNewsletter(Action<TelegramChat> sendAction);
-        
-        /// <summary>
-        /// Subscribe the chat to the newsletter asynchronously.
-        /// </summary>
-        /// <param name="newsletterKey"></param>
-        /// <param name="chatId"></param>
-        /// <returns></returns>
-        Task<bool> SubscribeChatAsync(string newsletterKey, long chatId);
-        
-        /// <summary>
-        /// Subscribe the chat to the newsletter asynchronously.
-        /// </summary>
-        /// <param name="newsletterKey"></param>
-        /// <param name="chatId"></param>
-        /// <returns></returns>
-        bool SubscribeChat(string newsletterKey, long chatId);
-        Task<bool> UnsubscribeChatAsync(string newsletterKey, long chatId);
-        bool UnsubscribeChat(string newsletterKey, long chatId);
+namespace Telegram.Bot.Advanced.Services;
 
-        Task<bool> IsChatSubscribedToNewsletterAsync(string newsletterKey, long chatId);
-        bool IsChatSubscribedToNewsletter(string newsletterKey, long chatId);
-        Task<List<Newsletter>> GetNewslettersAsync();
-        List<Newsletter> GetNewsletters();
-        Task<Newsletter?> GetNewsletterByKeyAsync(string newsletterKey);
-        Newsletter? GetNewsletterByKey(string newsletterKey);
-        Task<bool> CreateNewsletterAsync(Newsletter newsletter);
-        bool CreateNewsletter(Newsletter newsletter);
+public interface INewsletterService {
+    /// <summary>
+    /// Execute sendAction sequentially for each chat subscribed to newsletterKey. Delivery stops propagating
+    /// cancellation immediately if cancellationToken is triggered; any other exception thrown by sendAction for
+    /// a given chat is recorded in the returned result instead of aborting the whole newsletter.
+    /// </summary>
+    Task<SendResult> SendNewsletterAsync(string newsletterKey, Func<TelegramChat, CancellationToken, Task> sendAction,
+        CancellationToken cancellationToken = default);
 
-        Task<bool> RemoveNewsletterAsync(string newsletterKey);
-        
-        bool RemoveNewsletter(string newsletterKey);
-    }
+    /// <summary>
+    /// Execute sendAction sequentially for every chat known to the bot. Delivery stops propagating cancellation
+    /// immediately if cancellationToken is triggered; any other exception thrown by sendAction for a given chat
+    /// is recorded in the returned result instead of aborting the whole newsletter.
+    /// </summary>
+    Task<SendResult> SendNewsletterAsync(Func<TelegramChat, CancellationToken, Task> sendAction,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Subscribe the chat to the newsletter. Returns false if the chat is already subscribed.
+    /// </summary>
+    Task<bool> SubscribeChatAsync(string newsletterKey, long chatId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Unsubscribe the chat from the newsletter. Returns false if the chat wasn't subscribed.
+    /// </summary>
+    Task<bool> UnsubscribeChatAsync(string newsletterKey, long chatId, CancellationToken cancellationToken = default);
+
+    Task<bool> IsChatSubscribedToNewsletterAsync(string newsletterKey, long chatId, CancellationToken cancellationToken = default);
+
+    Task<List<Newsletter>> GetNewslettersAsync(CancellationToken cancellationToken = default);
+
+    Task<Newsletter?> GetNewsletterByKeyAsync(string newsletterKey, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Create the newsletter. Returns false if a newsletter with the same key already exists.
+    /// </summary>
+    Task<bool> CreateNewsletterAsync(Newsletter newsletter, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Remove the newsletter. Returns false if no newsletter with that key exists.
+    /// </summary>
+    Task<bool> RemoveNewsletterAsync(string newsletterKey, CancellationToken cancellationToken = default);
 }

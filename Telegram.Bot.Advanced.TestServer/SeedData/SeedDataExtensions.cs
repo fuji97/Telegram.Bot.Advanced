@@ -1,19 +1,10 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Telegram.Bot.Advanced.DbContexts;
+namespace Telegram.Bot.Advanced.TestServer.SeedData;
 
-namespace Telegram.Bot.Advanced.TestServer.SeedData {
-    public static class SeedDataExtensions {
-        public static IApplicationBuilder SeedData(this IApplicationBuilder app) {
-            using (var scope = app.ApplicationServices.CreateScope())
-            {
-                var services = scope.ServiceProvider;
-                var context = services.GetRequiredService<TestTelegramContext>();
- 
-                new DataSeeder(context).SeedData();
-            }
+public static class SeedDataExtensions {
+    public static async Task SeedDataAsync(this IApplicationBuilder app, CancellationToken cancellationToken = default) {
+        await using var scope = app.ApplicationServices.CreateAsyncScope();
 
-            return app;
-        }
+        var context = scope.ServiceProvider.GetRequiredService<TestTelegramContext>();
+        await new DataSeeder(context).SeedDataAsync(cancellationToken);
     }
 }

@@ -1,19 +1,19 @@
-using System;
-using System.Collections.Generic;
 using Telegram.Bot.Advanced.DbContexts;
 
-namespace Telegram.Bot.Advanced.Models {
-    public class SendResult {
-        public int TotalSubscribers { get; }
-        public int TotalErrors { get; }
-        public int TotalSuccesses { get; }
-        public Dictionary<TelegramChat, Exception> Errors { get; }
+namespace Telegram.Bot.Advanced.Models;
 
-        public SendResult(int totalSubscribers, int totalErrors, int totalSuccesses, Dictionary<TelegramChat, Exception> errors) {
-            TotalSubscribers = totalSubscribers;
-            TotalErrors = totalErrors;
-            TotalSuccesses = totalSuccesses;
-            Errors = errors;
-        }
+/// <summary>
+/// Immutable outcome of a newsletter send operation.
+/// </summary>
+public sealed class SendResult {
+    public int TotalSuccesses { get; }
+    public IReadOnlyDictionary<TelegramChat, Exception> Errors { get; }
+
+    public int TotalErrors => Errors.Count;
+    public int TotalSubscribers => TotalSuccesses + TotalErrors;
+
+    public SendResult(int totalSuccesses, IReadOnlyDictionary<TelegramChat, Exception> errors) {
+        TotalSuccesses = totalSuccesses;
+        Errors = new Dictionary<TelegramChat, Exception>(errors);
     }
 }
