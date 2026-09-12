@@ -51,8 +51,9 @@ dotnet run --project Telegram.Bot.Advanced.TestServer -- webhook
 
 ## Code Conventions & Common Patterns
 
-- Follow the edited file's existing namespace form and Allman-brace style; most files use block namespaces, with a few file-scoped exceptions.
+- Every file uses a file-scoped `namespace Foo;` declaration and same-line ("Egyptian bracket") opening braces for type/member declarations; match this convention in new and edited files.
 - Public APIs use PascalCase; interfaces use `I` prefixes; private fields use `_camelCase`; the generic EF context parameter is `TContext`.
+- Classes are `sealed` by default. The only unsealed/abstract extension points are `TelegramController<TContext>`, `DispatcherFilterAttribute`, `TelegramContext`, and `TelegramBotAdvancedException` — seal every new leaf controller, filter, model, entity, exception, and hosted service unless it is genuinely meant to be subclassed by hosts.
 - Nullable references and implicit usings are enabled on every project. Annotate optional references with `?`; validate required setup at public construction/registration boundaries.
 - New host integration belongs in extension methods on `IServiceCollection` or `IEndpointRouteBuilder`. Keep holder lifetime singleton and controllers/newsletter services scoped.
 - Configure new bots through `new TelegramBotData(options => { ... })`; `TelegramBotDataBuilder` no longer exists.
