@@ -179,6 +179,48 @@ public sealed class FilterAndParsingTests {
     }
 
     [Fact]
+    public void MessageCommand_NullText_LeavesAllFieldsNullAndIsEmptyTrue() {
+        var command = new MessageCommand(new Message { Text = null });
+
+        Assert.True(command.IsEmpty());
+        Assert.False(command.IsCommand());
+        Assert.Null(command.Text);
+        Assert.Null(command.Command);
+        Assert.Null(command.Target);
+        Assert.Empty(command.Parameters);
+    }
+
+    [Fact]
+    public void MessageCommand_PlainNonCommandText_CommandNullButTextPreserved() {
+        var command = new MessageCommand(new Message { Text = "just chatting" });
+
+        Assert.False(command.IsCommand());
+        Assert.False(command.IsEmpty());
+        Assert.Equal("just chatting", command.Text);
+        Assert.Null(command.Command);
+        Assert.Null(command.Target);
+        Assert.Empty(command.Parameters);
+    }
+
+    [Fact]
+    public void MessageCommand_MultipleConsecutiveSpaces_ParametersCollapseEmptyEntries() {
+        var command = new MessageCommand(new Message { Text = "/cmd  a   b" });
+
+        Assert.Equal("cmd", command.Command);
+        Assert.Equal(["a", "b"], command.Parameters);
+    }
+
+    [Fact]
+    public void MessageCommand_TargetOnlyNoTrailingText_ParametersEmptyMessageEmpty() {
+        var command = new MessageCommand(new Message { Text = "/broadcast@my_bot" });
+
+        Assert.Equal("broadcast", command.Command);
+        Assert.Equal("my_bot", command.Target);
+        Assert.Empty(command.Parameters);
+        Assert.Equal("", command.Message);
+    }
+
+    [Fact]
     public void InlineDataWrapper_ToStringThenParseInlineData_RoundTripsCommandAndMultiKeyData() {
         var wrapper = new InlineDataWrapper("cmd", new Dictionary<string, string> { ["x"] = "1", ["y"] = "two words" });
 

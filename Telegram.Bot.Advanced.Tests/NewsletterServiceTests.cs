@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Telegram.Bot.Advanced.DbContexts;
@@ -157,5 +158,157 @@ public sealed class NewsletterServiceTests {
         Task SendAction(TelegramChat chat, CancellationToken token) => throw new OperationCanceledException("cancelled mid-send");
 
         await Assert.ThrowsAsync<OperationCanceledException>(() => service.SendNewsletterAsync("news", SendAction, ct));
+    }
+
+    // ---- global send, missing-newsletter overload, subscription queries, CRUD, DI registration ---------------
+
+    [Fact]
+    public async Task SendNewsletterAsync_Global_VisitsEveryChatRegardlessOfSubscription() {
+        var ct = TestContext.Current.CancellationToken;
+        await using var context = TestTelegramContext.Create();
+        await SeedAsync(context, "news", 1, 2, 3);
+        var service = CreateService(context);
+        await service.SubscribeChatAsync("news", 1, ct);
+
+        var visited = new List<long>();
+        Task SendAction(TelegramChat chat, CancellationToken token) { visited.Add(chat.Id); return Task.CompletedTask; }
+
+        var result = await service.SendNewsletterAsync(SendAction, ct);
+
+        Assert.Equal([1L, 2L, 3L], visited);
+        Assert.Equal(3, result.TotalSuccesses);
+    }
+
+    [Fact]
+    public async Task SendNewsletterAsync_NamedKeyWithoutNewsletterEntity_SendsToNobodyWithoutThrowing() {
+        var ct = TestContext.Current.CancellationToken;
+        await using var context = TestTelegramContext.Create();
+        var service = CreateService(context);
+        var called = false;
+        Task SendAction(TelegramChat chat, CancellationToken token) { called = true; return Task.CompletedTask; }
+
+        var result = await service.SendNewsletterAsync("nonexistent-key", SendAction, ct);
+
+        Assert.False(called);
+        Assert.Equal(0, result.TotalSuccesses);
+        Assert.Equal(0, result.TotalErrors);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task IsChatSubscribedToNewsletterAsync_ReflectsSubscriptionState(bool subscribed) {
+        var ct = TestContext.Current.CancellationToken;
+        await using var context = TestTelegramContext.Create();
+        await SeedAsync(context, "news", 1);
+        var service = CreateService(context);
+        if (subscribed) {
+            await service.SubscribeChatAsync("news", 1, ct);
+        }
+
+        Assert.Equal(subscribed, await service.IsChatSubscribedToNewsletterAsync("news", 1, ct));
+    }
+
+    [Fact]
+    public async Task IsChatSubscribedToNewsletterAsync_UnknownNewsletter_ThrowsNewsletterException() {
+        var ct = TestContext.Current.CancellationToken;
+        await using var context = TestTelegramContext.Create();
+        context.Users.Add(new TelegramChat(1) { Type = ChatType.Private });
+        await context.SaveChangesAsync(ct);
+        var service = CreateService(context);
+
+        await Assert.ThrowsAsync<NewsletterException>(() => service.IsChatSubscribedToNewsletterAsync("missing-key", 1, ct));
+    }
+
+    [Fact]
+    public async Task IsChatSubscribedToNewsletterAsync_UnknownChat_ThrowsNewsletterException() {
+        var ct = TestContext.Current.CancellationToken;
+        await using var context = TestTelegramContext.Create();
+        context.Newsletters.Add(new Newsletter("news", "description"));
+        await context.SaveChangesAsync(ct);
+        var service = CreateService(context);
+
+        await Assert.ThrowsAsync<NewsletterException>(() => service.IsChatSubscribedToNewsletterAsync("news", 12345, ct));
+    }
+
+    [Fact]
+    public async Task CreateNewsletterAsync_NewKey_ReturnsTrueAndPersists() {
+        var ct = TestContext.Current.CancellationToken;
+        await using var context = TestTelegramContext.Create();
+        var service = CreateService(context);
+
+        var created = await service.CreateNewsletterAsync(new Newsletter("news", "desc"), ct);
+
+        Assert.True(created);
+        Assert.NotNull(await context.Newsletters.FindAsync(["news"], ct));
+    }
+
+    [Fact]
+    public async Task CreateNewsletterAsync_ExistingKey_ReturnsFalseWithoutOverwritingDescription() {
+        var ct = TestContext.Current.CancellationToken;
+        await using var context = TestTelegramContext.Create();
+        var service = CreateService(context);
+        await service.CreateNewsletterAsync(new Newsletter("news", "original"), ct);
+
+        var created = await service.CreateNewsletterAsync(new Newsletter("news", "replacement"), ct);
+
+        Assert.False(created);
+        var persisted = await context.Newsletters.FindAsync(["news"], ct);
+        Assert.Equal("original", persisted!.Description);
+    }
+
+    [Fact]
+    public async Task RemoveNewsletterAsync_ExistingKey_ReturnsTrueAndDeletes() {
+        var ct = TestContext.Current.CancellationToken;
+        await using var context = TestTelegramContext.Create();
+        var service = CreateService(context);
+        await service.CreateNewsletterAsync(new Newsletter("news", "desc"), ct);
+
+        var removed = await service.RemoveNewsletterAsync("news", ct);
+
+        Assert.True(removed);
+        Assert.Null(await context.Newsletters.FindAsync(["news"], ct));
+    }
+
+    [Fact]
+    public async Task RemoveNewsletterAsync_MissingKey_ReturnsFalse() {
+        var ct = TestContext.Current.CancellationToken;
+        await using var context = TestTelegramContext.Create();
+        var service = CreateService(context);
+
+        Assert.False(await service.RemoveNewsletterAsync("missing", ct));
+    }
+
+    [Fact]
+    public async Task GetNewslettersAsync_ReturnsAllPersistedNewsletters() {
+        var ct = TestContext.Current.CancellationToken;
+        await using var context = TestTelegramContext.Create();
+        var service = CreateService(context);
+        await service.CreateNewsletterAsync(new Newsletter("news1", "d1"), ct);
+        await service.CreateNewsletterAsync(new Newsletter("news2", "d2"), ct);
+
+        var newsletters = await service.GetNewslettersAsync(ct);
+
+        Assert.Equal(["news1", "news2"], newsletters.Select(n => n.Key).OrderBy(k => k));
+    }
+
+    [Fact]
+    public async Task GetNewsletterByKeyAsync_MissingKey_ReturnsNull() {
+        var ct = TestContext.Current.CancellationToken;
+        await using var context = TestTelegramContext.Create();
+        var service = CreateService(context);
+
+        Assert.Null(await service.GetNewsletterByKeyAsync("missing", ct));
+    }
+
+    [Fact]
+    public void AddNewsletter_RegistersScopedNewsletterService() {
+        var services = new ServiceCollection();
+
+        services.AddNewsletter<TestTelegramContext>();
+
+        var descriptor = Assert.Single(services, d => d.ServiceType == typeof(INewsletterService));
+        Assert.Equal(ServiceLifetime.Scoped, descriptor.Lifetime);
+        Assert.Equal(typeof(NewsletterService<TestTelegramContext>), descriptor.ImplementationType);
     }
 }
